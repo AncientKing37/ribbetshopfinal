@@ -39,13 +39,13 @@ const ServicesSection = () => {
         <img 
           src="/uploads/common-bg.png" 
           alt="Background" 
-          className="w-full h-full object-cover opacity-40"
+          className="w-full h-full object-cover"
         />
-        <div className="absolute inset-0 bg-cyber-blue-dark/80 backdrop-blur-sm"></div>
+        <div className="absolute inset-0 bg-cyber-blue-dark"></div>
       </div>
 
       {/* Background decorative elements */}
-      <div className="absolute inset-0 opacity-10 bg-grid-pattern"></div>
+      <div className="absolute inset-0 bg-grid-pattern"></div>
       <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-cyber-purple via-cyber-magenta to-cyber-purple"></div>
       
       {/* Scroll to Top Button */}

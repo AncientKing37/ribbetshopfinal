@@ -208,7 +208,7 @@ const AuthForm = ({ type }: AuthFormProps) => {
       transition={{ duration: 0.5 }}
       className="w-full max-w-md mx-auto"
     >
-      <div className="cyber-card p-6 md:p-8 bg-cyber-blue-dark/90 backdrop-blur-md border border-cyber-purple/20">
+      <div className="cyber-card p-6 md:p-8 bg-cyber-blue-dark border border-cyber-purple/20">
         <div className="text-center mb-6">
           <h1 className="text-3xl font-bold cyber-neon-text mb-2">
             {type === 'login' ? 'Login' : 'Create Account'}

@@ -29,9 +29,9 @@ const Login = () => {
           <img 
             src="/uploads/common-bg.png" 
             alt="Background" 
-            className="w-full h-full object-cover opacity-90"
+            className="w-full h-full object-cover"
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-cyber-blue-dark/70 via-cyber-blue-dark/50 to-cyber-blue-dark/70 backdrop-blur-sm"></div>
+          <div className="absolute inset-0 bg-cyber-blue-dark"></div>
         </div>
         
         {/* Content */}

@@ -13,7 +13,7 @@ const HeroSection = () => {
           alt="Background" 
           className="w-full h-full object-cover object-center" 
         />
-        <div className="absolute inset-0 bg-cyber-blue-dark/60 backdrop-blur-[1px]"></div>
+        <div className="absolute inset-0 bg-cyber-blue-dark/40"></div>
       </div>
       
       {/* Decorative background elements */}

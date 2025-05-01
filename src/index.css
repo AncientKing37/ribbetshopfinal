@@ -51,7 +51,7 @@
   }
   
   body {
-    @apply bg-cyber-blue-dark text-foreground bg-grid-pattern;
+    @apply bg-cyber-blue-dark text-foreground;
   }
   
   /* Custom styling */
@@ -62,7 +62,7 @@
   
   .cyber-border:before {
     content: '';
-    @apply absolute inset-0 bg-gradient-to-r from-cyber-purple/10 to-cyber-magenta/10 opacity-50;
+    @apply absolute inset-0 bg-gradient-to-r from-cyber-purple/10 to-cyber-magenta/10;
     z-index: -1;
   }
   
@@ -80,7 +80,7 @@
   .cyber-button:before {
     content: '';
     @apply absolute inset-0 bg-gradient-to-r from-cyber-purple/20 to-cyber-magenta/20 
-           opacity-80 hover:opacity-100 transition-opacity;
+           hover:opacity-100 transition-opacity;
     z-index: -1;
   }
   
@@ -124,12 +124,12 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #8b5cf6;
+  background: #9b87f5;
   border-radius: 5px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #7c3aed;
+  background: #6E59A5;
 }
 
 /* For Firefox */

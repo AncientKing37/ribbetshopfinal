@@ -29,9 +29,9 @@ const Register = () => {
           <img 
             src="/uploads/common-bg.png" 
             alt="Background" 
-            className="w-full h-full object-cover opacity-40"
+            className="w-full h-full object-cover opacity-60"
           />
-          <div className="absolute inset-0 bg-cyber-blue-dark/80 backdrop-blur-sm"></div>
+          <div className="absolute inset-0 bg-cyber-blue-dark/40"></div>
         </div>
         
         {/* Content */}
