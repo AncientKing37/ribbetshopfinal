@@ -1,0 +1,139 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 260 15% 8%;
+    --foreground: 270 100% 98%;
+
+    --card: 260 15% 12%;
+    --card-foreground: 270 100% 98%;
+
+    --popover: 260 15% 10%;
+    --popover-foreground: 270 100% 98%;
+
+    --primary: 265 80% 75%;
+    --primary-foreground: 260 15% 11%;
+
+    --secondary: 280 70% 60%;
+    --secondary-foreground: 270 100% 98%;
+
+    --muted: 260 15% 20%;
+    --muted-foreground: 270 10% 80%;
+
+    --accent: 290 70% 60%;
+    --accent-foreground: 270 100% 98%;
+
+    --destructive: 0 62.8% 60.6%;
+    --destructive-foreground: 270 100% 98%;
+
+    --border: 260 15% 25%;
+    --input: 260 15% 18%;
+    --ring: 265 80% 75%;
+
+    --radius: 0.5rem;
+
+    --sidebar-background: 260 15% 10%;
+    --sidebar-foreground: 270 100% 90%;
+    --sidebar-primary: 265 80% 75%;
+    --sidebar-primary-foreground: 260 15% 11%;
+    --sidebar-accent: 280 70% 60%;
+    --sidebar-accent-foreground: 270 100% 98%;
+    --sidebar-border: 260 15% 25%;
+    --sidebar-ring: 265 80% 75%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  
+  body {
+    @apply bg-cyber-blue-dark text-foreground bg-grid-pattern;
+  }
+  
+  /* Custom styling */
+  .cyber-border {
+    @apply relative border border-cyber-purple/50 rounded-md overflow-hidden;
+    box-shadow: 0 0 10px rgba(155, 135, 245, 0.2);
+  }
+  
+  .cyber-border:before {
+    content: '';
+    @apply absolute inset-0 bg-gradient-to-r from-cyber-purple/10 to-cyber-magenta/10 opacity-50;
+    z-index: -1;
+  }
+  
+  .cyber-glow {
+    text-shadow: 0 0 8px rgba(155, 135, 245, 0.8);
+  }
+  
+  .cyber-button {
+    @apply relative px-6 py-2 bg-cyber-purple/20 hover:bg-cyber-purple/30 
+           text-white rounded-md overflow-hidden transition-all duration-300 
+           border border-cyber-purple/50;
+    box-shadow: 0 0 10px rgba(155, 135, 245, 0.3);
+  }
+  
+  .cyber-button:before {
+    content: '';
+    @apply absolute inset-0 bg-gradient-to-r from-cyber-purple/20 to-cyber-magenta/20 
+           opacity-80 hover:opacity-100 transition-opacity;
+    z-index: -1;
+  }
+  
+  .cyber-button:hover {
+    box-shadow: 0 0 15px rgba(155, 135, 245, 0.5);
+  }
+  
+  .shimmer-bg {
+    background: linear-gradient(90deg, 
+      rgba(155, 135, 245, 0.1), 
+      rgba(217, 70, 239, 0.2), 
+      rgba(155, 135, 245, 0.1));
+    background-size: 200% 100%;
+    @apply animate-shimmer;
+  }
+  
+  .cyber-card {
+    @apply relative rounded-lg overflow-hidden bg-cyber-blue p-4 border border-cyber-purple/30;
+    box-shadow: 0 4px 20px rgba(15, 18, 25, 0.8), 0 0 15px rgba(155, 135, 245, 0.2) inset;
+  }
+  
+  .cyber-input {
+    @apply bg-cyber-blue-dark border border-cyber-purple/30 rounded-md px-4 py-2
+           text-white focus:outline-none focus:ring-1 focus:ring-cyber-purple/50 
+           placeholder:text-gray-500;
+  }
+  
+  .cyber-neon-text {
+    @apply text-cyber-purple font-bold cyber-glow;
+  }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #1a1a2e;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #8b5cf6;
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #7c3aed;
+}
+
+/* For Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #8b5cf6 #1a1a2e;
+}
