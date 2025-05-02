@@ -1,7 +1,7 @@
 import Layout from '@/components/layout/Layout';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { 
@@ -12,7 +12,8 @@ import {
   CardHeader,
   CardTitle
 } from '@/components/ui/card';
-import { PlusCircle, BadgeDollarSign } from 'lucide-react';
+import { PlusCircle, BadgeDollarSign, ShoppingCart, Zap } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 
 const creditPackages = [
   {
@@ -70,9 +71,60 @@ const Credits = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [selectedPackage, setSelectedPackage] = useState<number | null>(null);
+  const [cartItems, setCartItems] = useState<any[]>([]);
+  const [cartLoading, setCartLoading] = useState(false);
+  const [cartError, setCartError] = useState<string | null>(null);
+  const [checkoutLoading, setCheckoutLoading] = useState(false);
 
   const handleSelectPackage = (index: number) => {
     setSelectedPackage(index);
+  };
+
+  // Fetch cart items for the current user
+  useEffect(() => {
+    const fetchCart = async () => {
+      if (!user) {
+        setCartItems([]);
+        return;
+      }
+      setCartLoading(true);
+      setCartError(null);
+      const { data, error } = await supabase
+        .from('credit_cart')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+      if (error) {
+        setCartError('Failed to fetch cart');
+        setCartItems([]);
+      } else {
+        setCartItems(data || []);
+      }
+      setCartLoading(false);
+    };
+    fetchCart();
+  }, [user]);
+
+  const handleAddToCart = async (pkg: typeof creditPackages[0]) => {
+    if (!user) {
+      toast({
+        title: "Login Required",
+        description: "Please login to add to cart",
+        variant: "destructive",
+      });
+      return;
+    }
+    const { error } = await supabase.from('credit_cart').insert({
+      user_id: user.id,
+      package_credits: pkg.credits,
+      package_price: pkg.price,
+      quantity: 1,
+    });
+    if (error) {
+      toast({ title: "Error", description: "Could not add to cart", variant: "destructive" });
+    } else {
+      toast({ title: "Added to Cart", description: `${pkg.credits} credits added to your cart!` });
+    }
   };
 
   const handlePurchase = async (pkg: typeof creditPackages[0]) => {
@@ -100,9 +152,49 @@ const Credits = () => {
     });
   };
 
+  // Remove a cart item
+  const handleRemoveCartItem = async (id: string) => {
+    setCartLoading(true);
+    const { error } = await supabase.from('credit_cart').delete().eq('id', id);
+    if (error) {
+      toast({ title: 'Error', description: 'Could not remove item', variant: 'destructive' });
+    } else {
+      setCartItems((items) => items.filter((item) => item.id !== id));
+      toast({ title: 'Removed', description: 'Item removed from cart.' });
+    }
+    setCartLoading(false);
+  };
+
+  // Update quantity for a cart item
+  const handleUpdateQuantity = async (id: string, newQuantity: number) => {
+    if (newQuantity < 1) return;
+    setCartLoading(true);
+    const { error } = await supabase.from('credit_cart').update({ quantity: newQuantity }).eq('id', id);
+    if (error) {
+      toast({ title: 'Error', description: 'Could not update quantity', variant: 'destructive' });
+    } else {
+      setCartItems((items) => items.map((item) => item.id === id ? { ...item, quantity: newQuantity } : item));
+    }
+    setCartLoading(false);
+  };
+
+  // Checkout: clear all cart items for the user
+  const handleCheckout = async () => {
+    if (!user) return;
+    setCheckoutLoading(true);
+    const { error } = await supabase.from('credit_cart').delete().eq('user_id', user.id);
+    if (error) {
+      toast({ title: 'Error', description: 'Checkout failed', variant: 'destructive' });
+    } else {
+      setCartItems([]);
+      toast({ title: 'Checkout Successful', description: 'Thank you for your purchase!' });
+    }
+    setCheckoutLoading(false);
+  };
+
   return (
     <Layout title="Purchase Credits">
-      <div className="py-8 md:py-16">
+      <div className="py-8 md:py-16" style={{ background: 'url(/uploads/common-bg.png) center center / cover no-repeat', minHeight: '100vh' }}>
         <div className="container mx-auto px-4">
           <motion.div 
             className="text-center mb-8 md:mb-12"
@@ -119,72 +211,60 @@ const Credits = () => {
             </p>
           </motion.div>
           
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
-            {creditPackages.map((pkg, index) => (
-              <motion.div
-                key={`${pkg.name}-${pkg.credits}`}
-                className="h-full"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-                whileHover={{ scale: 1.03, transition: { duration: 0.2 } }}
-              >
-                <Card className={`h-full cyber-card relative flex flex-col ${
-                  pkg.popular ? 'border-cyber-magenta' : ''
-                } ${selectedPackage === index ? `ring-2 ring-${pkg.color}` : ''}`}>
-                  {pkg.popular && (
-                    <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-cyber-magenta text-white px-4 py-1 rounded-full text-sm font-medium z-10">
-                      Most Popular
+          <div className="w-full flex justify-center">
+            <div
+              className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 md:gap-8"
+              style={{ maxWidth: '1360px' }}
+            >
+              {creditPackages.map((pkg, index) => (
+                <motion.div
+                  key={`${pkg.name}-${pkg.credits}`}
+                  className="flex flex-col rounded-2xl shadow-xl bg-cyber-blue-dark overflow-hidden"
+                  style={{ maxWidth: 320, width: '100%' }}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: index * 0.1 }}
+                  whileHover={{ scale: 1.03, transition: { duration: 0.2 } }}
+                >
+                  {/* Image section */}
+                  <div className="relative">
+                    <img
+                      src={`/uploads/credits/${pkg.credits}.png`}
+                      alt={`${pkg.credits} Credits`}
+                      className="w-full h-[400px] object-contain rounded-t-2xl bg-black"
+                    />
+                  </div>
+                  {/* Bottom section */}
+                  <div className="flex flex-col bg-[#181B23] p-6 rounded-b-2xl">
+                    <div>
+                      <div className="text-lg font-bold text-white mb-0.5">{pkg.credits.toLocaleString()} Web Credit</div>
+                      <div className="text-gray-400 text-sm mb-2">Get Web Credits on our website!</div>
                     </div>
-                  )}
-                  
-                  <CardHeader className="text-center">
-                    <CardTitle className="text-xl font-bold text-white">
-                      {pkg.name} Pack
-                    </CardTitle>
-                    <CardDescription className="text-gray-400">
-                      Best for casual users
-                    </CardDescription>
-                  </CardHeader>
-                  
-                  <CardContent className="text-center flex-grow">
-                    <div className="mb-2">
-                      <span className={`text-4xl font-bold text-${pkg.color}`}>
-                        {pkg.credits.toLocaleString()}
-                      </span>
-                      <span className="text-gray-400"> Credits</span>
+                    <div className="flex items-center justify-between">
+                      <div className="text-white text-lg font-bold">${pkg.price.toFixed(2)} USD</div>
                     </div>
-                    
-                    <div className="text-2xl font-bold mb-4 text-white">
-                      ${pkg.price.toFixed(2)}
+                    <div className="flex gap-2 mt-4">
+                      <Button
+                        className="flex-1 bg-cyber-purple hover:bg-cyber-purple/90 text-white font-semibold rounded-md flex items-center justify-center gap-2"
+                        style={{ backgroundColor: 'var(--cyber-purple, #9b87f5)' }}
+                        onClick={() => handleAddToCart(pkg)}
+                      >
+                        <ShoppingCart className="w-5 h-5" />
+                        Add to Cart
+                      </Button>
+                      <Button
+                        className="flex-1 bg-cyber-magenta hover:bg-cyber-magenta/90 text-white font-semibold rounded-md flex items-center justify-center gap-2"
+                        style={{ backgroundColor: 'var(--cyber-magenta, #e84cff)' }}
+                        onClick={() => handlePurchase(pkg)}
+                      >
+                        <Zap className="w-5 h-5" />
+                        Buy Now
+                      </Button>
                     </div>
-                    
-                    <div className="text-sm text-gray-400 mb-4">
-                      {(pkg.price / pkg.credits * 1000).toFixed(2)}¢ per 1000 credits
-                    </div>
-                    
-                    <div className="flex items-center justify-center mb-2">
-                      <BadgeDollarSign className="h-5 w-5 mr-2 text-green-500" />
-                      <span className="text-gray-300 text-sm">Best value in its tier</span>
-                    </div>
-                  </CardContent>
-                  
-                  <CardFooter>
-                    <Button 
-                      className={`w-full ${
-                        pkg.popular 
-                          ? 'bg-cyber-magenta hover:bg-cyber-magenta/80' 
-                          : 'cyber-button'
-                      }`}
-                      onClick={() => handlePurchase(pkg)}
-                    >
-                      <PlusCircle className="mr-2 h-4 w-4" />
-                      Buy Now
-                    </Button>
-                  </CardFooter>
-                </Card>
-              </motion.div>
-            ))}
+                  </div>
+                </motion.div>
+              ))}
+            </div>
           </div>
           
           <div className="mt-16 max-w-3xl mx-auto">
@@ -217,6 +297,46 @@ const Credits = () => {
                 </li>
               </ul>
             </div>
+          </div>
+
+          {/* Cart Section */}
+          <div className="mt-12 max-w-2xl mx-auto w-full bg-[#181B23] rounded-xl p-6 shadow-lg">
+            <h2 className="text-2xl font-bold text-cyber-purple mb-4">Your Cart</h2>
+            {cartLoading ? (
+              <div className="text-gray-400">Loading...</div>
+            ) : cartError ? (
+              <div className="text-red-500">{cartError}</div>
+            ) : cartItems.length === 0 ? (
+              <div className="text-gray-400">Your cart is empty.</div>
+            ) : (
+              <>
+                <ul className="divide-y divide-cyber-purple/20 mb-4">
+                  {cartItems.map((item) => (
+                    <li key={item.id} className="py-2 flex justify-between items-center gap-2">
+                      <span className="text-white">{item.package_credits.toLocaleString()} Credits</span>
+                      <span className="text-cyber-purple font-bold">${item.package_price.toFixed(2)}</span>
+                      <div className="flex items-center gap-1">
+                        <Button size="sm" variant="outline" className="px-2 py-1" onClick={() => handleUpdateQuantity(item.id, item.quantity - 1)} disabled={cartLoading || item.quantity <= 1}>-</Button>
+                        <span className="mx-2 text-white font-bold">{item.quantity}</span>
+                        <Button size="sm" variant="outline" className="px-2 py-1" onClick={() => handleUpdateQuantity(item.id, item.quantity + 1)} disabled={cartLoading}>+</Button>
+                      </div>
+                      <Button size="sm" variant="outline" className="ml-2 text-red-400 border-red-400 hover:bg-red-900/30" onClick={() => handleRemoveCartItem(item.id)} disabled={cartLoading}>
+                        Remove
+                      </Button>
+                    </li>
+                  ))}
+                </ul>
+                <div className="flex justify-between items-center text-lg font-bold text-white mb-4">
+                  <span>Total:</span>
+                  <span>
+                    ${cartItems.reduce((sum, item) => sum + (item.package_price * (item.quantity || 1)), 0).toFixed(2)}
+                  </span>
+                </div>
+                <Button className="w-full bg-cyber-magenta hover:bg-cyber-magenta/90 text-white font-bold py-3 rounded-lg" onClick={handleCheckout} disabled={checkoutLoading || cartItems.length === 0}>
+                  {checkoutLoading ? 'Processing...' : 'Checkout'}
+                </Button>
+              </>
+            )}
           </div>
         </div>
       </div>

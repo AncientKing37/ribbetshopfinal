@@ -102,6 +102,9 @@ const Navbar = () => {
             <Link to="/reviews" className="text-white hover:text-cyber-purple transition-colors">
               Reviews
             </Link>
+            <Link to="/contact" className="text-white hover:text-cyber-purple transition-colors">
+              Contact Us
+            </Link>
           </div>
           
           {/* Actions */}
@@ -213,6 +216,13 @@ const Navbar = () => {
               onClick={() => setIsMenuOpen(false)}
             >
               Reviews
+            </Link>
+            <Link 
+              to="/contact" 
+              className="block py-2 px-4 text-white hover:bg-cyber-blue rounded-md"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Contact Us
             </Link>
             {user && (
               <>

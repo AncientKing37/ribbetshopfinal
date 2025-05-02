@@ -27,7 +27,7 @@ const Register = () => {
         {/* Background Image */}
         <div className="absolute inset-0 z-0">
           <img 
-            src="/uploads/bg1.png" 
+            src="/uploads/register-bg.png" 
             alt="Background" 
             className="w-full h-full object-cover"
           />
