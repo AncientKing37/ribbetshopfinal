@@ -23,19 +23,18 @@ const Register = () => {
   
   return (
     <Layout title="Register">
-      <div className="relative min-h-[calc(100vh-200px)]">
+      <div className="relative min-h-screen overflow-hidden flex items-center justify-center">
         {/* Background Image */}
         <div className="absolute inset-0 z-0">
           <img 
-            src="/uploads/common-bg.png" 
+            src="/uploads/bg1.png" 
             alt="Background" 
-            className="w-full h-full object-cover opacity-60"
+            className="w-full h-full object-cover"
           />
-          <div className="absolute inset-0 bg-cyber-blue-dark/40"></div>
         </div>
         
         {/* Content */}
-        <div className="relative z-10 py-16 flex items-center justify-center">
+        <div className="relative z-10 w-full max-w-md px-4">
           <AuthForm type="register" />
         </div>
       </div>

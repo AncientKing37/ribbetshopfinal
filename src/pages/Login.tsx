@@ -23,22 +23,18 @@ const Login = () => {
   
   return (
     <Layout title="Login">
-      <div className="relative min-h-screen">
+      <div className="relative min-h-screen overflow-hidden">
         {/* Background Image */}
-        <div className="fixed inset-0 z-0">
+        <div className="absolute inset-0 z-0">
           <img 
-            src="/uploads/common-bg.png" 
+            src="/uploads/bg1.png" 
             alt="Background" 
             className="w-full h-full object-cover"
           />
-          <div className="absolute inset-0 bg-cyber-blue-dark"></div>
         </div>
-        
         {/* Content */}
-        <div className="relative z-10 py-16 flex items-center justify-center min-h-screen">
-          <div className="w-full max-w-md px-4">
-            <AuthForm type="login" />
-          </div>
+        <div className="relative z-10 w-full max-w-md px-4 py-20 mx-auto">
+          <AuthForm type="login" />
         </div>
       </div>
     </Layout>

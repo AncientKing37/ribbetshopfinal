@@ -72,12 +72,23 @@ const Navbar = () => {
   };
   
   return (
-    <nav className="sticky top-0 z-50 bg-cyber-blue-dark border-b border-cyber-purple/20">
+    <nav className="sticky top-0 z-50 bg-black border-b border-cyber-purple/20">
       <div className="container mx-auto px-4 py-3">
         <div className="flex justify-between items-center">
           {/* Logo */}
-          <Link to="/" className="flex items-center space-x-2">
-            <div className="text-2xl font-bold cyber-neon-text">RIBBET<span className="text-cyber-magenta">SHOP</span></div>
+          <Link to="/" className="flex items-center space-x-1">
+            <img
+              src="/uploads/logo.png"
+              alt="Logo"
+              className="h-12 w-auto"
+              style={{ minWidth: '3rem' }}
+            />
+            <span
+              className="text-xl font-bold font-sans bg-gradient-to-r from-white to-pink-400 bg-clip-text text-transparent"
+              style={{ letterSpacing: '0.01em' }}
+            >
+              RIBBETSHOP
+            </span>
           </Link>
           
           {/* Desktop Navigation */}
