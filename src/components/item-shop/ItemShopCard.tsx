@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { ShoppingCart, Star, Gift } from 'lucide-react';
+import { ShoppingCart, Star, Gift, Zap } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { ItemCardBadge } from './card-components/ItemCardBadge';
 import { ItemCardImage } from './card-components/ItemCardImage';
@@ -23,12 +23,15 @@ const ItemShopCard = ({ entry, isFeatured = false }: ItemShopCardProps) => {
   if (!mainItem) return null;
   
   // Determine rarity for border color and styling
-  // FortniteAPI.io returns rarity as an object with rarity and name properties
   let rarity = 'common';
-  if (typeof mainItem.rarity === 'string') {
-    rarity = mainItem.rarity.toLowerCase();
-  } else if (mainItem.rarity && typeof mainItem.rarity.name === 'string') {
-    rarity = mainItem.rarity.name.toLowerCase();
+  if (mainItem.rarity) {
+    if (typeof mainItem.rarity === 'string') {
+      rarity = mainItem.rarity.toLowerCase();
+    } else if (mainItem.rarity.name) {
+      rarity = mainItem.rarity.name.toLowerCase();
+    } else if (mainItem.rarity.id) {
+      rarity = mainItem.rarity.id.toLowerCase();
+    }
   }
   
   // Map rarity to color class
@@ -60,16 +63,28 @@ const ItemShopCard = ({ entry, isFeatured = false }: ItemShopCardProps) => {
   const platformPrice = Math.round(regularPrice * 0.8); // 20% discount
   
   // Get the image URL - fortniteapi.io uses different image properties
-  const imageUrl = entry.bundle
-    ? entry.bundle.image
-    : mainItem.images?.icon || mainItem.images?.featured;
+  let imageUrl = entry.bundle?.image;
+
+  // Try all possible image fields for mainItem, prioritizing displayAssets[0].url
+  if (!imageUrl) {
+    imageUrl =
+      (Array.isArray(mainItem.displayAssets) && mainItem.displayAssets[0]?.url) ||
+      mainItem.displayAsset?.url ||
+      mainItem.images?.icon ||
+      mainItem.images?.featured ||
+      mainItem.images?.smallIcon ||
+      mainItem.images?.background ||
+      mainItem.background ||
+      mainItem.full_background ||
+      mainItem.icon ||
+      mainItem.image ||
+      null;
+  }
   
   // Ensure the image URL is properly formatted
-  const getFormattedImageUrl = (url: string) => {
-    if (!url) return 'https://placehold.co/150x150?text=No+Image&bg=2a2133&fg=ada3f0';
-    // If the URL is already HTTPS, return it as is
+  const getFormattedImageUrl = (url: string | null) => {
+    if (!url) return null;
     if (url.startsWith('https://')) return url;
-    // If it's HTTP, convert to HTTPS
     if (url.startsWith('http://')) return url.replace('http://', 'https://');
     return url;
   };
@@ -86,12 +101,14 @@ const ItemShopCard = ({ entry, isFeatured = false }: ItemShopCardProps) => {
   
   const badge = getBadge();
 
-  // Get item type - fortniteapi.io returns type as an object with name property
+  // Get item type - handle both string and object types
   let itemType = '';
   if (typeof mainItem.type === 'string') {
     itemType = mainItem.type.toLowerCase();
   } else if (mainItem.type && typeof mainItem.type.name === 'string') {
     itemType = mainItem.type.name.toLowerCase();
+  } else if (mainItem.type && typeof mainItem.type.id === 'string') {
+    itemType = mainItem.type.id.toLowerCase();
   }
   const isGiftable = !entry.bundle && itemType.includes('outfit');
 
@@ -120,11 +137,13 @@ const ItemShopCard = ({ entry, isFeatured = false }: ItemShopCardProps) => {
         {badge && <ItemCardBadge type="badge" value={badge} />}
         
         {/* Item Image */}
-        <ItemCardImage 
-          imageUrl={formattedImageUrl} 
-          name={name} 
-          isHovered={isHovered} 
-        />
+        {formattedImageUrl && (
+          <ItemCardImage 
+            imageUrl={formattedImageUrl} 
+            name={name} 
+            isHovered={isHovered} 
+          />
+        )}
         
         <div className="p-3">
           <h3 className="text-cyber-purple-light font-semibold mb-2 truncate">{name}</h3>
@@ -139,42 +158,18 @@ const ItemShopCard = ({ entry, isFeatured = false }: ItemShopCardProps) => {
             regularPrice={regularPrice} 
             platformPrice={platformPrice} 
           />
-          
-          <div className="flex gap-2 mt-3">
-            <Button 
-              className="cyber-button flex-1 py-1 text-sm flex items-center justify-center gap-2"
-              onClick={handleViewDetails}
-            >
-              <ShoppingCart className="w-3 h-3" />
-              View Details
-            </Button>
-            
-            {isGiftable && (
-              <Button 
-                variant="outline"
-                className="py-1 text-sm flex items-center justify-center gap-2"
-                onClick={() => setShowDialog(true)}
-              >
-                <Gift className="w-3 h-3" />
-                Gift
-              </Button>
-            )}
-          </div>
+
+          {/* Buy Now Button */}
+          <Button
+            className="w-full mt-4 bg-cyber-magenta hover:bg-cyber-magenta/90 text-white font-semibold rounded-md flex items-center justify-center gap-2 py-2"
+            style={{ backgroundColor: 'var(--cyber-magenta, #e84cff)' }}
+            onClick={handleViewDetails}
+          >
+            <Zap className="w-5 h-5" />
+            Buy Now
+          </Button>
         </div>
       </motion.div>
-      
-      {/* Item Details Dialog */}
-      <ItemDetailsDialog 
-        showDialog={showDialog}
-        setShowDialog={setShowDialog}
-        mainItem={mainItem}
-        name={name}
-        rarity={rarity}
-        imageUrl={formattedImageUrl}
-        regularPrice={regularPrice}
-        platformPrice={platformPrice}
-        entry={entry}
-      />
     </>
   );
 };

@@ -8,6 +8,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import Layout from '@/components/layout/Layout';
 import { Loader2 } from 'lucide-react';
+import { getEnv } from '@/integrations/supabase/env';
 
 // FortniteAPI.io API key
 const API_KEY = 'e0372996-579b848c-da237dbb-3c57cb66';
@@ -59,10 +60,20 @@ const ItemPage = () => {
 
   useEffect(() => {
     const fetchItemDetails = async () => {
+      const apiKey = getEnv('FORTNITE_API_KEY');
+      if (!apiKey) {
+        toast({
+          title: "Configuration Error",
+          description: "Fortnite API key not found in environment variables",
+          variant: "destructive",
+        });
+        return;
+      }
+
       try {
         const response = await fetch(`https://fortniteapi.io/v2/shop?lang=en`, {
           headers: {
-            'Authorization': API_KEY,
+            'Authorization': apiKey,
             'Content-Type': 'application/json'
           }
         });
@@ -77,12 +88,16 @@ const ItemPage = () => {
         if (shopItem) {
           setItem({
             name: shopItem.displayName || shopItem.name,
-            description: shopItem.description || '',
+            description: shopItem.displayDescription || shopItem.description || '',
             type: shopItem.type?.name || shopItem.type || 'Unknown',
             rarity: shopItem.rarity?.name || shopItem.rarity || 'Unknown',
             images: {
-              icon: shopItem.icon,
-              featured: shopItem.full_background
+              icon: Array.isArray(shopItem.displayAssets) && shopItem.displayAssets[0]?.url
+                ? shopItem.displayAssets[0].url
+                : shopItem.icon,
+              featured: Array.isArray(shopItem.displayAssets) && shopItem.displayAssets[0]?.url
+                ? shopItem.displayAssets[0].url
+                : shopItem.full_background
             },
             price: shopItem.price?.finalPrice || shopItem.price || 0
           });
@@ -138,11 +153,10 @@ const ItemPage = () => {
       const { error: cartError } = await supabase
         .from('cart')
         .insert({
-          user_id: user.id,
-          item_eid: eid,
+          item_id: eid,
           item_name: item.name,
           price: item.price,
-          image_url: item.images.featured,
+          item_image: item.images.featured,
           epic_username: epicUsername
         });
 

@@ -9,15 +9,18 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { formatDistanceToNow } from 'date-fns';
-
-// FortniteAPI.io API key
-const API_KEY = 'e0372996-579b848c-da237dbb-3c57cb66';
+import { getEnvVariable } from '@/integrations/supabase/env';
 
 const fetchFortniteShop = async () => {
+  const apiKey = await getEnvVariable('FORTNITE_API_KEY');
+  if (!apiKey) {
+    throw new Error('Fortnite API key not found in Supabase environment variables');
+  }
+
   try {
     const response = await fetch('https://fortniteapi.io/v2/shop?lang=en', {
       headers: {
-        'Authorization': API_KEY,
+        'Authorization': apiKey,
         'Content-Type': 'application/json'
       }
     });
@@ -29,13 +32,15 @@ const fetchFortniteShop = async () => {
     
     const data = await response.json();
     console.log('API Response:', data);
+    if (data && data.shop && data.shop.length > 0) {
+      console.log('Sample shop item:', data.shop[0]);
+    }
     
     if (!data || !data.shop) {
       throw new Error('Invalid response format from Fortnite API');
     }
     
     // Transform the API response to match our expected format
-    // FortniteAPI.io has a different response structure
     return {
       data: {
         featured: {
@@ -45,20 +50,23 @@ const fetchFortniteShop = async () => {
               offerId: item.mainId,
               items: [{
                 name: item.displayName || item.name,
-                description: item.description,
-                type: item.type,
+                description: item.displayDescription || item.description,
+                type: item.displayType || item.type,
                 rarity: item.rarity,
                 images: {
-                  icon: item.icon,
-                  featured: item.full_background
+                  icon: Array.isArray(item.displayAssets) && item.displayAssets[0]?.url
+                    ? item.displayAssets[0].url
+                    : undefined
                 }
               }],
-              regularPrice: item.price,
-              finalPrice: item.finalPrice || item.price,
+              regularPrice: item.price?.regularPrice || item.price,
+              finalPrice: item.price?.finalPrice || item.finalPrice || item.price,
               bundle: item.bundle ? {
                 name: item.displayName,
-                info: item.description,
-                image: item.full_background
+                info: item.displayDescription || item.description,
+                image: Array.isArray(item.displayAssets) && item.displayAssets[0]?.url
+                  ? item.displayAssets[0].url
+                  : undefined
               } : undefined
             }))
         },
@@ -69,20 +77,23 @@ const fetchFortniteShop = async () => {
               offerId: item.mainId,
               items: [{
                 name: item.displayName || item.name,
-                description: item.description,
-                type: item.type,
+                description: item.displayDescription || item.description,
+                type: item.displayType || item.type,
                 rarity: item.rarity,
                 images: {
-                  icon: item.icon,
-                  featured: item.full_background
+                  icon: Array.isArray(item.displayAssets) && item.displayAssets[0]?.url
+                    ? item.displayAssets[0].url
+                    : undefined
                 }
               }],
-              regularPrice: item.price,
-              finalPrice: item.finalPrice || item.price,
+              regularPrice: item.price?.regularPrice || item.price,
+              finalPrice: item.price?.finalPrice || item.finalPrice || item.price,
               bundle: item.bundle ? {
                 name: item.displayName,
-                info: item.description,
-                image: item.full_background
+                info: item.displayDescription || item.description,
+                image: Array.isArray(item.displayAssets) && item.displayAssets[0]?.url
+                  ? item.displayAssets[0].url
+                  : undefined
               } : undefined
             }))
         }
@@ -106,7 +117,8 @@ const ItemShop = () => {
     retry: 3,
     retryDelay: 1000,
     staleTime: 1000 * 60 * 5, // 5 minutes
-    refetchOnWindowFocus: false
+    refetchOnWindowFocus: false,
+    enabled: true // This ensures the query runs when the component mounts
   });
 
   // Update countdown timer

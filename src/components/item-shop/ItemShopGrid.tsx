@@ -8,17 +8,22 @@ interface ShopEntry {
   offerId: string;
   items: Array<{
     name: string;
-    description: string;
-    type: {
-      value: string;
+    description?: string;
+    type?: {
+      value?: string;
+      name?: string;
+      id?: string;
     };
-    rarity: {
-      value: string;
+    rarity?: {
+      value?: string;
+      name?: string;
+      id?: string;
     };
-    images: {
-      icon: string;
-      featured: string;
-      smallIcon: string;
+    images?: {
+      icon?: string;
+      featured?: string;
+      smallIcon?: string;
+      background?: string;
     };
   }>;
   bundle?: {
@@ -126,7 +131,11 @@ const ItemShopGrid = ({ data, isLoading, error, activeFilter }: ItemShopGridProp
     
     if (entry.items && entry.items.length > 0) {
       return entry.items.some((item: any) => {
-        const type = item.type ? item.type.value ? item.type.value.toLowerCase() : item.type.toLowerCase() : '';
+        const type = item.type 
+          ? (typeof item.type === 'string' 
+              ? item.type.toLowerCase() 
+              : (item.type.value || item.type.name || item.type.id || '').toLowerCase())
+          : '';
         
         switch (activeFilter) {
           case 'outfits':
