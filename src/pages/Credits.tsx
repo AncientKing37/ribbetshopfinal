@@ -4,6 +4,8 @@ import { Button } from '@/components/ui/button';
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { useCart } from '@/contexts/CartContext';
+import { useNavigate } from 'react-router-dom';
 import { 
   Card,
   CardContent,
@@ -15,7 +17,7 @@ import {
 import { PlusCircle, BadgeDollarSign, ShoppingCart, Zap } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 
-const creditPackages = [
+export const creditPackages = [
   {
     name: "Starter",
     credits: 1000,
@@ -69,7 +71,9 @@ const creditPackages = [
 
 const Credits = () => {
   const { user } = useAuth();
+  const { addToCart } = useCart();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [selectedPackage, setSelectedPackage] = useState<number | null>(null);
   const [cartItems, setCartItems] = useState<any[]>([]);
   const [cartLoading, setCartLoading] = useState(false);
@@ -90,10 +94,10 @@ const Credits = () => {
       setCartLoading(true);
       setCartError(null);
       const { data, error } = await supabase
-        .from('credit_cart')
+        .from('cart')
         .select('*')
         .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
+        .order('added_at', { ascending: false });
       if (error) {
         setCartError('Failed to fetch cart');
         setCartItems([]);
@@ -114,17 +118,13 @@ const Credits = () => {
       });
       return;
     }
-    const { error } = await supabase.from('credit_cart').insert({
-      user_id: user.id,
-      package_credits: pkg.credits,
-      package_price: pkg.price,
+    await addToCart({
+      item_id: String(pkg.credits),
+      item_name: pkg.name,
+      item_image: `/uploads/credits/${pkg.credits}.png`,
+      price: pkg.price,
       quantity: 1,
     });
-    if (error) {
-      toast({ title: "Error", description: "Could not add to cart", variant: "destructive" });
-    } else {
-      toast({ title: "Added to Cart", description: `${pkg.credits} credits added to your cart!` });
-    }
   };
 
   const handlePurchase = async (pkg: typeof creditPackages[0]) => {
@@ -136,26 +136,21 @@ const Credits = () => {
       });
       return;
     }
-    
-    toast({
-      title: "Processing...",
-      description: "Your purchase is being processed",
+    await addToCart({
+      item_id: String(pkg.credits),
+      item_name: pkg.name,
+      item_image: `/uploads/credits/${pkg.credits}.png`,
+      price: pkg.price,
+      quantity: 1,
     });
-    
-    // This will be replaced with actual Stripe implementation later
-    console.log(`Purchasing ${pkg.credits} credits for $${pkg.price}`);
-    
-    // For now, show a placeholder message
-    toast({
-      title: "Coming Soon",
-      description: "Payment functionality will be implemented soon",
-    });
+    toast({ title: 'Redirecting to Cart', description: 'Proceed to checkout your credits!' });
+    navigate('/cart');
   };
 
   // Remove a cart item
   const handleRemoveCartItem = async (id: string) => {
     setCartLoading(true);
-    const { error } = await supabase.from('credit_cart').delete().eq('id', id);
+    const { error } = await supabase.from('cart').delete().eq('id', id);
     if (error) {
       toast({ title: 'Error', description: 'Could not remove item', variant: 'destructive' });
     } else {
@@ -169,7 +164,7 @@ const Credits = () => {
   const handleUpdateQuantity = async (id: string, newQuantity: number) => {
     if (newQuantity < 1) return;
     setCartLoading(true);
-    const { error } = await supabase.from('credit_cart').update({ quantity: newQuantity }).eq('id', id);
+    const { error } = await supabase.from('cart').update({ quantity: newQuantity }).eq('id', id);
     if (error) {
       toast({ title: 'Error', description: 'Could not update quantity', variant: 'destructive' });
     } else {
@@ -182,7 +177,7 @@ const Credits = () => {
   const handleCheckout = async () => {
     if (!user) return;
     setCheckoutLoading(true);
-    const { error } = await supabase.from('credit_cart').delete().eq('user_id', user.id);
+    const { error } = await supabase.from('cart').delete().eq('user_id', user.id);
     if (error) {
       toast({ title: 'Error', description: 'Checkout failed', variant: 'destructive' });
     } else {
@@ -203,8 +198,7 @@ const Credits = () => {
             transition={{ duration: 0.5 }}
           >
             <h1 className="text-3xl md:text-4xl font-bold mb-4">
-              <span className="text-white">Buy </span>
-              <span className="cyber-neon-text">Credits</span>
+              <span className="text-white">Buy Credits</span>
             </h1>
             <p className="text-gray-300 max-w-2xl mx-auto">
               Purchase credits to use across our platform. The more credits you buy, the better the value.
@@ -313,8 +307,8 @@ const Credits = () => {
                 <ul className="divide-y divide-cyber-purple/20 mb-4">
                   {cartItems.map((item) => (
                     <li key={item.id} className="py-2 flex justify-between items-center gap-2">
-                      <span className="text-white">{item.package_credits.toLocaleString()} Credits</span>
-                      <span className="text-cyber-purple font-bold">${item.package_price.toFixed(2)}</span>
+                      <span className="text-white">{item.item_name}</span>
+                      <span className="text-cyber-purple font-bold">${item.price.toFixed(2)}</span>
                       <div className="flex items-center gap-1">
                         <Button size="sm" variant="outline" className="px-2 py-1" onClick={() => handleUpdateQuantity(item.id, item.quantity - 1)} disabled={cartLoading || item.quantity <= 1}>-</Button>
                         <span className="mx-2 text-white font-bold">{item.quantity}</span>
@@ -329,7 +323,7 @@ const Credits = () => {
                 <div className="flex justify-between items-center text-lg font-bold text-white mb-4">
                   <span>Total:</span>
                   <span>
-                    ${cartItems.reduce((sum, item) => sum + (item.package_price * (item.quantity || 1)), 0).toFixed(2)}
+                    ${cartItems.reduce((sum, item) => sum + (item.price * (item.quantity || 1)), 0).toFixed(2)}
                   </span>
                 </div>
                 <Button className="w-full bg-cyber-magenta hover:bg-cyber-magenta/90 text-white font-bold py-3 rounded-lg" onClick={handleCheckout} disabled={checkoutLoading || cartItems.length === 0}>

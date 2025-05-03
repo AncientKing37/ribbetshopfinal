@@ -9,6 +9,7 @@ interface CartItem {
   item_name: string;
   item_image: string;
   price: number;
+  quantity: number;
   added_at: string;
 }
 
@@ -43,7 +44,16 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
       return;
     }
 
-    setItems(data || []);
+    setItems((data || []).map((item) => ({
+      id: item.id,
+      user_id: item.user_id,
+      item_id: item.item_id,
+      item_name: item.item_name,
+      item_image: item.item_image,
+      price: item.price,
+      quantity: item.quantity,
+      added_at: item.added_at,
+    })));
   };
 
   useEffect(() => {
@@ -61,36 +71,90 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
       return;
     }
 
-    const { error } = await supabase
+    // Check if item already exists in cart
+    const { data: existingArr, error: selectError } = await supabase
       .from('cart')
-      .insert({
-        ...item,
-        user_id: session.user.id,
-        added_at: new Date().toISOString()
-      });
+      .select('*')
+      .eq('user_id', session.user.id)
+      .eq('item_id', item.item_id);
+    const existing = existingArr && existingArr.length > 0 ? existingArr[0] : null;
 
-    if (error) {
-      console.error('Error adding to cart:', error);
+    if (existing) {
+      // Optimistic update: increment quantity in local state
+      setItems((prev) => prev.map((ci) =>
+        ci.user_id === session.user.id && ci.item_id === item.item_id
+          ? { ...ci, quantity: ci.quantity + 1 }
+          : ci
+      ));
       toast({
-        title: "Error",
-        description: "Failed to add item to cart. Please try again.",
-        variant: "destructive",
+        title: "Added to Cart",
+        description: "Item quantity increased in your cart.",
       });
-      return;
+      // Update quantity in Supabase
+      const { error: updateError } = await supabase
+        .from('cart')
+        .update({ quantity: existing.quantity + 1 })
+        .eq('id', existing.id);
+      if (updateError) {
+        console.error('Error updating cart quantity:', updateError);
+        toast({
+          title: "Error",
+          description: "Failed to update cart item. Please try again.",
+          variant: "destructive",
+        });
+      }
+    } else {
+      // Optimistic update: add new item
+      const tempId = Math.random().toString(36).substr(2, 9);
+      setItems((prev) => [
+        ...prev,
+        {
+          ...item,
+          id: tempId,
+          user_id: session.user.id,
+          added_at: new Date().toISOString(),
+          quantity: 1,
+        },
+      ]);
+      toast({
+        title: "Added to Cart",
+        description: "Item has been added to your cart.",
+      });
+      // Insert new row in Supabase
+      const { error: insertError } = await supabase
+        .from('cart')
+        .insert({
+          ...item,
+          user_id: session.user.id,
+          added_at: new Date().toISOString(),
+          quantity: 1,
+        });
+      if (insertError) {
+        console.error('Error adding to cart:', insertError);
+        toast({
+          title: "Error",
+          description: "Failed to add item to cart. Please try again.",
+          variant: "destructive",
+        });
+      }
     }
-
+    // Always refresh to sync with server
     await refreshCart();
-    toast({
-      title: "Added to Cart",
-      description: "Item has been added to your cart.",
-    });
   };
 
   const removeFromCart = async (itemId: string) => {
+    // Optimistic update
+    setItems((prev) => prev.filter((item) => item.id !== itemId));
+
     const { error } = await supabase
       .from('cart')
       .delete()
       .eq('id', itemId);
+
+    await refreshCart();
+
+    // Force clear if cart is empty after refresh
+    setItems((prev) => (prev.length === 0 ? [] : prev));
 
     if (error) {
       console.error('Error removing from cart:', error);
@@ -102,7 +166,6 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
       return;
     }
 
-    await refreshCart();
     toast({
       title: "Removed from Cart",
       description: "Item has been removed from your cart.",
@@ -131,8 +194,8 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
     setItems([]);
   };
 
-  const itemCount = items.length;
-  const totalPrice = items.reduce((sum, item) => sum + item.price, 0);
+  const itemCount = items.reduce((sum, item) => sum + (item.quantity || 1), 0);
+  const totalPrice = items.reduce((sum, item) => sum + item.price * (item.quantity || 1), 0);
 
   return (
     <CartContext.Provider

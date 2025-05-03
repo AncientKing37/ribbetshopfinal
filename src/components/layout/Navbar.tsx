@@ -31,18 +31,22 @@ const Navbar = () => {
         return;
       }
 
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('credits')
-        .eq('id', user.id)
-        .single();
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('credits')
+          .eq('id', user.id)
+          .maybeSingle();
 
-      if (error) {
-        console.error('Error fetching credits:', error);
-        return;
+        if (error) {
+          console.error('Error fetching credits:', error);
+          return;
+        }
+
+        setCredits(data?.credits ?? 0);
+      } catch (error) {
+        console.error('Error in fetchCredits:', error);
       }
-
-      setCredits(data?.credits || 0);
     };
 
     fetchCredits();
@@ -99,8 +103,8 @@ const Navbar = () => {
             <Link to="/credits" className="text-white hover:text-cyber-purple transition-colors">
               Credits
             </Link>
-            <Link to="/reviews" className="text-white hover:text-cyber-purple transition-colors">
-              Reviews
+            <Link to="/fn-crew" className="text-white hover:text-cyber-purple transition-colors">
+              FN Crew
             </Link>
             <Link to="/contact" className="text-white hover:text-cyber-purple transition-colors">
               Contact Us
@@ -118,18 +122,17 @@ const Navbar = () => {
                   </div>
                 )}
 
-                <Button
-                  variant="outline"
-                  className="cyber-button relative"
+                <button
+                  className="relative flex items-center justify-center w-8 h-8 bg-[#181823] rounded-[12px] border border-[#232334] hover:shadow-lg transition-shadow"
                   onClick={() => navigate('/cart')}
                 >
-                  <ShoppingCart className="h-5 w-5" />
+                  <ShoppingCart className="h-5 w-5 text-white" />
                   {itemCount > 0 && (
-                    <Badge className="absolute -top-2 -right-2 bg-cyber-purple text-white">
+                    <span className="absolute -top-2 -right-2 bg-pink-500 text-white text-xs font-bold rounded-full px-1.5 py-0.5 min-w-[18px] text-center border-2 border-[#181823] shadow-lg">
                       {itemCount}
-                    </Badge>
+                    </span>
                   )}
-                </Button>
+                </button>
                 
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -211,11 +214,11 @@ const Navbar = () => {
               Credits
             </Link>
             <Link 
-              to="/reviews" 
+              to="/fn-crew" 
               className="block py-2 px-4 text-white hover:bg-cyber-blue rounded-md"
               onClick={() => setIsMenuOpen(false)}
             >
-              Reviews
+              FN Crew
             </Link>
             <Link 
               to="/contact" 
@@ -228,15 +231,18 @@ const Navbar = () => {
               <>
                 <Link 
                   to="/cart" 
-                  className="block py-2 px-4 text-white hover:bg-cyber-blue rounded-md flex items-center gap-2"
+                  className="block py-2 px-4 text-white hover:bg-cyber-blue rounded-md flex items-center gap-2 relative"
                   onClick={() => setIsMenuOpen(false)}
                 >
-                  Cart
-                  {itemCount > 0 && (
-                    <Badge className="bg-cyber-purple text-white">
-                      {itemCount}
-                    </Badge>
-                  )}
+                  <div className="relative flex items-center justify-center w-6 h-6 bg-[#181823] rounded-[12px] border border-[#232334]">
+                    <ShoppingCart className="h-4 w-4 text-white" />
+                    {itemCount > 0 && (
+                      <span className="absolute -top-2 -right-2 bg-pink-500 text-white text-xs font-bold rounded-full px-1.5 py-0.5 min-w-[16px] text-center border-2 border-[#181823] shadow-lg">
+                        {itemCount}
+                      </span>
+                    )}
+                  </div>
+                  <span className="ml-2">Cart</span>
                 </Link>
                 {credits !== null && (
                   <div className="px-4 py-2 rounded bg-cyber-blue border border-cyber-purple/30 cyber-glow">

@@ -3,14 +3,12 @@ import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 import { initializeEnv, getEnv } from './env';
 
-// Initialize environment variables
-initializeEnv().catch(console.error);
-
 // Get Supabase configuration from environment variables
-const SUPABASE_URL = getEnv('SUPABASE_URL') || "https://kdmphqumrkaolfevjicf.supabase.co";
-const SUPABASE_PUBLISHABLE_KEY = getEnv('SUPABASE_KEY') || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtkbXBocXVtcmthb2xmZXZqaWNmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDU5NTIzOTgsImV4cCI6MjA2MTUyODM5OH0.TC5iaXq2bJOGTmXFZJAGckvQ4i6E83Pmt-xbuaWxraU";
+const SUPABASE_URL = "https://kdmphqumrkaolfevjicf.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtkbXBocXVtcmthb2xmZXZqaWNmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDU5NTIzOTgsImV4cCI6MjA2MTUyODM5OH0.TC5iaXq2bJOGTmXFZJAGckvQ4i6E83Pmt-xbuaWxraU";
 
-// Import the supabase client like this:
-// import { supabase } from "@/integrations/supabase/client";
-
+// Create the Supabase client
 export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+
+// Initialize environment variables after client creation
+initializeEnv().catch(console.error);

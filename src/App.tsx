@@ -15,7 +15,7 @@ import AuthCallback from "./pages/AuthCallback";
 import ResetPassword from "./pages/ResetPassword";
 import Credits from "./pages/Credits";
 import ItemShop from "./pages/ItemShop";
-import Reviews from "./pages/Reviews";
+import FNCrew from "./pages/FNCrew";
 import NotFound from "./pages/NotFound";
 import ItemPage from "./pages/item/[eid]";
 import Cart from "./pages/Cart";
@@ -42,7 +42,7 @@ const App = () => (
             <Route path="/auth/reset-password" element={<ResetPassword />} />
             <Route path="/credits" element={<Credits />} />
             <Route path="/item-shop" element={<ItemShop />} />
-            <Route path="/reviews" element={<Reviews />} />
+            <Route path="/fn-crew" element={<FNCrew />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/item/:eid" element={<ItemPage />} />
             <Route path="/cart" element={<Cart />} />

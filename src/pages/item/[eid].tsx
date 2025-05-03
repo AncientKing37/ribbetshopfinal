@@ -47,7 +47,7 @@ const ItemPage = () => {
         .from('profiles')
         .select('credits')
         .eq('id', user.id)
-        .single();
+        .maybeSingle();
       
       if (profile) {
         setCredits(profile.credits || 0);
