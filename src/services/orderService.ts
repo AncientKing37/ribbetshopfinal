@@ -44,20 +44,15 @@ export const createOrder = async (
 };
 
 export const processOrder = async (orderId: string): Promise<Order> => {
-  // Update order status to processing
-  const { data: order, error: updateError } = await supabase
+  // Do NOT update order status to processing here. Let the Discord bot handle status changes.
+  const { data: order, error } = await supabase
     .from('itemshop_orders')
-    .update({
-      status: 'processing',
-      processed_at: new Date().toISOString(),
-      processed_by: 'system'
-    })
-    .eq('id', orderId)
     .select()
+    .eq('id', orderId)
     .single();
 
-  if (updateError) {
-    throw new Error(`Failed to update order status: ${updateError.message}`);
+  if (error) {
+    throw new Error(`Failed to fetch order: ${error.message}`);
   }
 
   try {
@@ -83,7 +78,7 @@ export const processOrder = async (orderId: string): Promise<Order> => {
       }
     }
 
-    // Do NOT set status to completed here. Let the Discord bot do it after gifting.
+    // Do NOT set status to processing or completed here. Let the Discord bot do it after gifting.
     return order;
   } catch (error) {
     // If any error occurs, mark the order as failed
