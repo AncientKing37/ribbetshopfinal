@@ -83,22 +83,8 @@ export const processOrder = async (orderId: string): Promise<Order> => {
       }
     }
 
-    // Update order status to completed
-    const { data: completedOrder, error: completeError } = await supabase
-      .from('itemshop_orders')
-      .update({
-        status: 'completed',
-        completed_at: new Date().toISOString()
-      })
-      .eq('id', orderId)
-      .select()
-      .single();
-
-    if (completeError) {
-      throw new Error(`Failed to complete order: ${completeError.message}`);
-    }
-
-    return completedOrder;
+    // Do NOT set status to completed here. Let the Discord bot do it after gifting.
+    return order;
   } catch (error) {
     // If any error occurs, mark the order as failed
     const { data: failedOrder } = await supabase
