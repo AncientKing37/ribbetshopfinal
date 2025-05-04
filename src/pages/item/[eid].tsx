@@ -9,6 +9,7 @@ import { supabase } from '@/integrations/supabase/client';
 import Layout from '@/components/layout/Layout';
 import { Loader2 } from 'lucide-react';
 import { getEnv } from '@/integrations/supabase/env';
+import { createOrder, processOrder } from '@/services/orderService';
 
 // FortniteAPI.io API key
 const API_KEY = 'e0372996-579b848c-da237dbb-3c57cb66';
@@ -141,39 +142,43 @@ const ItemPage = () => {
     setProcessing(true);
 
     try {
-      // Start a transaction
+      // Create order
+      const order = await createOrder(
+        user.id,
+        [{
+          item_id: eid,
+          item_name: item.name,
+          item_image: item.images.featured,
+          price: item.price,
+          quantity: 1,
+          epic_username: epicUsername
+        }],
+        epicUsername,
+        item.price
+      );
+
+      // Process order
+      await processOrder(order.id);
+
+      // Update user credits
       const { error: updateError } = await supabase
         .from('profiles')
         .update({ credits: credits - item.price })
         .eq('id', user.id);
-
       if (updateError) throw updateError;
-
-      // Add to cart
-      const { error: cartError } = await supabase
-        .from('cart')
-        .insert({
-          item_id: eid,
-          item_name: item.name,
-          price: item.price,
-          item_image: item.images.featured,
-          epic_username: epicUsername
-        });
-
-      if (cartError) throw cartError;
 
       toast({
         title: "Purchase Successful",
-        description: "Item has been added to your cart!",
+        description: "Your item has been purchased and will be delivered to your Epic Games account shortly.",
       });
 
       setShowModal(false);
-      navigate('/cart');
+      navigate('/orders');
     } catch (error) {
       console.error('Error processing purchase:', error);
       toast({
         title: "Error",
-        description: "Failed to process your purchase. Please try again.",
+        description: error instanceof Error ? error.message : JSON.stringify(error),
         variant: "destructive",
       });
     } finally {
