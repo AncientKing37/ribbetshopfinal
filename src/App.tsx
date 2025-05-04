@@ -20,6 +20,7 @@ import NotFound from "./pages/NotFound";
 import ItemPage from "./pages/item/[eid]";
 import Cart from "./pages/Cart";
 import Contact from "./pages/Contact";
+import Orders from "./pages/Orders";
 
 const queryClient = new QueryClient();
 
@@ -46,6 +47,7 @@ const App = () => (
             <Route path="/contact" element={<Contact />} />
             <Route path="/item/:eid" element={<ItemPage />} />
             <Route path="/cart" element={<Cart />} />
+            <Route path="/orders" element={<Orders />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

@@ -2,7 +2,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Database } from '@/integrations/supabase/types';
 
 type OrderStatus = Database['public']['Enums']['order_status'];
-type Order = Database['public']['Tables']['orders']['Row'];
+type Order = any;
 
 export interface OrderItem {
   item_id: string;
@@ -20,20 +20,18 @@ export const createOrder = async (
   totalAmount: number
 ): Promise<Order> => {
   const { data, error } = await supabase
-    .from('orders')
+    .from('itemshop_orders')
     .insert({
       user_id: userId,
       status: 'pending',
       amount: totalAmount,
-      currency: 'USD',
+      currency: 'V-Bucks',
       items: items.map(item => ({
         ...item,
         epic_username: epicUsername
       })),
-      metadata: {
-        epic_username: epicUsername,
-        processed_by: 'system'
-      }
+      epic_username: epicUsername,
+      processed_by: 'system'
     })
     .select()
     .single();
@@ -48,7 +46,7 @@ export const createOrder = async (
 export const processOrder = async (orderId: string): Promise<Order> => {
   // Update order status to processing
   const { data: order, error: updateError } = await supabase
-    .from('orders')
+    .from('itemshop_orders')
     .update({
       status: 'processing',
       processed_at: new Date().toISOString(),
@@ -87,7 +85,7 @@ export const processOrder = async (orderId: string): Promise<Order> => {
 
     // Update order status to completed
     const { data: completedOrder, error: completeError } = await supabase
-      .from('orders')
+      .from('itemshop_orders')
       .update({
         status: 'completed',
         completed_at: new Date().toISOString()
@@ -104,7 +102,7 @@ export const processOrder = async (orderId: string): Promise<Order> => {
   } catch (error) {
     // If any error occurs, mark the order as failed
     const { data: failedOrder } = await supabase
-      .from('orders')
+      .from('itemshop_orders')
       .update({
         status: 'failed',
         error_message: error instanceof Error ? error.message : 'Unknown error occurred'
@@ -119,7 +117,7 @@ export const processOrder = async (orderId: string): Promise<Order> => {
 
 export const getOrder = async (orderId: string): Promise<Order> => {
   const { data, error } = await supabase
-    .from('orders')
+    .from('itemshop_orders')
     .select()
     .eq('id', orderId)
     .single();
@@ -133,7 +131,7 @@ export const getOrder = async (orderId: string): Promise<Order> => {
 
 export const getUserOrders = async (userId: string): Promise<Order[]> => {
   const { data, error } = await supabase
-    .from('orders')
+    .from('itemshop_orders')
     .select()
     .eq('user_id', userId)
     .order('created_at', { ascending: false });

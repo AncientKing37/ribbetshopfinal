@@ -7,6 +7,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { Loader2, Trash2, Plus, Minus } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useCart } from '@/contexts/CartContext';
+import { createOrder, processOrder } from '@/services/orderService';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
 
 const Cart = () => {
   const navigate = useNavigate();
@@ -16,7 +19,9 @@ const Cart = () => {
   const [cartError, setCartError] = useState<string | null>(null);
   const [credits, setCredits] = useState<number>(0);
   const [userId, setUserId] = useState<string | null>(null);
-  const { items, removeFromCart } = useCart();
+  const [epicUsername, setEpicUsername] = useState('');
+  const [showCheckoutDialog, setShowCheckoutDialog] = useState(false);
+  const { items, removeFromCart, clearCart } = useCart();
 
   // Fetch user and cart items
   useEffect(() => {
@@ -39,15 +44,6 @@ const Cart = () => {
         setCartError('Error fetching credits');
       }
       setCredits(profile?.credits || 0);
-      // Fetch cart items
-      const { data, error } = await supabase
-        .from('cart')
-        .select('*')
-        .eq('user_id', session.user.id)
-        .order('added_at', { ascending: false });
-      if (error) {
-        setCartError('Failed to fetch cart');
-      }
       setLoading(false);
     };
     fetchData();
@@ -64,17 +60,60 @@ const Cart = () => {
     setLoading(false);
   };
 
-  // Checkout: clear all cart items for the user
+  // Handle checkout process
   const handleCheckout = async () => {
-    if (!userId) return;
+    if (!userId || !epicUsername) return;
+    
     setCheckoutLoading(true);
-    const { error } = await supabase.from('cart').delete().eq('user_id', userId);
-    if (error) {
-      toast({ title: 'Error', description: 'Checkout failed', variant: 'destructive' });
-    } else {
-      toast({ title: 'Checkout Successful', description: 'Thank you for your purchase!' });
+    try {
+      // Create order
+      const order = await createOrder(
+        userId,
+        items.map(item => ({
+          item_id: item.item_id,
+          item_name: item.item_name,
+          item_image: item.item_image,
+          price: item.price,
+          quantity: item.quantity,
+          epic_username: epicUsername
+        })),
+        epicUsername,
+        totalPrice
+      );
+
+      // Process order
+      await processOrder(order.id);
+
+      // Clear cart
+      await clearCart();
+
+      // Update user credits
+      const { error: creditError } = await supabase
+        .from('profiles')
+        .update({ credits: credits - totalPrice })
+        .eq('id', userId);
+
+      if (creditError) {
+        throw new Error('Failed to update credits');
+      }
+
+      toast({ 
+        title: 'Order Successful', 
+        description: 'Your items have been purchased and will be delivered to your Epic Games account shortly.' 
+      });
+      
+      setShowCheckoutDialog(false);
+      navigate('/orders');
+    } catch (error) {
+      console.error('Checkout error:', error);
+      toast({ 
+        title: 'Checkout Failed', 
+        description: error instanceof Error ? error.message : JSON.stringify(error),
+        variant: 'destructive'
+      });
+    } finally {
+      setCheckoutLoading(false);
     }
-    setCheckoutLoading(false);
   };
 
   const totalPrice = items.reduce((sum, item) => sum + (item.price * (item.quantity || 1)), 0);
@@ -165,7 +204,7 @@ const Cart = () => {
               <span className="text-cyber-purple font-bold text-xl">${totalPrice.toFixed(2)}</span>
             </div>
             <Button
-              onClick={handleCheckout}
+              onClick={() => setShowCheckoutDialog(true)}
               className="w-full bg-cyber-purple hover:bg-cyber-purple/90"
               disabled={checkoutLoading || credits < totalPrice}
             >
@@ -181,6 +220,59 @@ const Cart = () => {
           </div>
         </motion.div>
       </div>
+
+      <Dialog open={showCheckoutDialog} onOpenChange={setShowCheckoutDialog}>
+        <DialogContent className="cyber-card">
+          <DialogHeader>
+            <DialogTitle>Confirm Checkout</DialogTitle>
+            <DialogDescription>
+              Please enter your Epic Games username to complete the purchase.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            <div>
+              <label className="text-sm text-gray-400">Epic Games Username</label>
+              <Input
+                value={epicUsername}
+                onChange={(e) => setEpicUsername(e.target.value)}
+                placeholder="Enter your Epic Games username"
+                className="mt-1"
+              />
+            </div>
+            
+            <div className="text-sm text-gray-400">
+              <p>Total Items: {items.reduce((sum, item) => sum + (item.quantity || 1), 0)}</p>
+              <p>Total Price: ${totalPrice.toFixed(2)}</p>
+              <p>Your Credits: {credits}</p>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setShowCheckoutDialog(false)}
+              disabled={checkoutLoading}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleCheckout}
+              className="bg-cyber-purple hover:bg-cyber-purple/90"
+              disabled={!epicUsername || checkoutLoading || credits < totalPrice}
+            >
+              {checkoutLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Processing...
+                </>
+              ) : (
+                'Confirm Purchase'
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Layout>
   );
 };
