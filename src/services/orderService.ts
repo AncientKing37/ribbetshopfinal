@@ -19,9 +19,29 @@ export const createOrder = async (
   epicUsername: string,
   totalAmount: number
 ): Promise<Order> => {
-  // Get the first item for the main order fields
-  const firstItem = items[0];
-  
+  // Get the first item for the main order fields, fallback to nulls if not present
+  const firstItem = items && items.length > 0 ? items[0] : null;
+
+  // Debug log
+  console.log('Creating order with:', {
+    user_id: userId,
+    status: 'pending',
+    amount: totalAmount,
+    currency: 'V-Bucks',
+    items: items.map(item => ({
+      id: item.item_id,
+      name: item.item_name,
+      image: item.item_image,
+      price: item.price,
+      quantity: item.quantity
+    })),
+    epic_username: epicUsername,
+    processed_by: 'system',
+    item_eid: firstItem ? firstItem.item_id : null,
+    item_name: firstItem ? firstItem.item_name : null,
+    price: firstItem ? firstItem.price : null
+  });
+
   const { data, error } = await supabase
     .from('itemshop_orders')
     .insert({
@@ -29,7 +49,6 @@ export const createOrder = async (
       status: 'pending',
       amount: totalAmount,
       currency: 'V-Bucks',
-      // Store items as a simplified array
       items: items.map(item => ({
         id: item.item_id,
         name: item.item_name,
@@ -39,10 +58,9 @@ export const createOrder = async (
       })),
       epic_username: epicUsername,
       processed_by: 'system',
-      // Add the main item details at the order level
-      item_eid: firstItem.item_id,
-      item_name: firstItem.item_name,
-      price: firstItem.price
+      item_eid: firstItem ? firstItem.item_id : null,
+      item_name: firstItem ? firstItem.item_name : null,
+      price: firstItem ? firstItem.price : null
     })
     .select()
     .single();
@@ -70,6 +88,10 @@ export const processOrder = async (orderId: string): Promise<Order> => {
     // Process each item in the order
     const items = order.items as OrderItem[];
     for (const item of items) {
+      // Validation: Ensure item_id is present
+      if (!item.item_id) {
+        throw new Error('Item is missing item_id, cannot create purchase record.');
+      }
       // Create purchase record
       const { error: purchaseError } = await supabase
         .from('purchases')
