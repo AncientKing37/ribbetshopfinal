@@ -19,6 +19,9 @@ export const createOrder = async (
   epicUsername: string,
   totalAmount: number
 ): Promise<Order> => {
+  // Get the first item for the main order fields
+  const firstItem = items[0];
+  
   const { data, error } = await supabase
     .from('itemshop_orders')
     .insert({
@@ -26,12 +29,20 @@ export const createOrder = async (
       status: 'pending',
       amount: totalAmount,
       currency: 'V-Bucks',
+      // Store items as a simplified array
       items: items.map(item => ({
-        ...item,
-        epic_username: epicUsername
+        id: item.item_id,
+        name: item.item_name,
+        image: item.item_image,
+        price: item.price,
+        quantity: item.quantity
       })),
       epic_username: epicUsername,
-      processed_by: 'system'
+      processed_by: 'system',
+      // Add the main item details at the order level
+      item_eid: firstItem.item_id,
+      item_name: firstItem.item_name,
+      price: firstItem.price
     })
     .select()
     .single();
