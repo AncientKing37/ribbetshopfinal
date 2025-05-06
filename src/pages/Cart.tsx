@@ -70,7 +70,7 @@ const Cart = () => {
       const order = await createOrder(
         userId,
         items.map(item => ({
-          item_id: item.item_id,
+          offerId: item.offerId,
           item_name: item.item_name,
           item_image: item.item_image,
           price: item.price,
@@ -184,7 +184,7 @@ const Cart = () => {
                 <Button
                   variant="ghost"
                   size="icon"
-                  onClick={() => removeFromCart(item.id)}
+                  onClick={() => removeFromCart(item.offerId)}
                   className="text-gray-400 hover:text-red-500"
                   disabled={loading}
                 >

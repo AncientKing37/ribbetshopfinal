@@ -1,11 +1,12 @@
 import { supabase } from '@/integrations/supabase/client';
 import { Database } from '@/integrations/supabase/types';
+import ItemPage from "./pages/item/[offerId]";
 
 type OrderStatus = Database['public']['Enums']['order_status'];
 type Order = any;
 
 export interface OrderItem {
-  item_id: string;
+  offerId: string;
   item_name: string;
   item_image: string;
   price: number;
@@ -29,7 +30,7 @@ export const createOrder = async (
     amount: totalAmount,
     currency: 'V-Bucks',
     items: items.map(item => ({
-      id: item.item_id,
+      offerId: item.offerId,
       name: item.item_name,
       image: item.item_image,
       price: item.price,
@@ -37,7 +38,7 @@ export const createOrder = async (
     })),
     epic_username: epicUsername,
     processed_by: 'system',
-    item_eid: firstItem ? firstItem.item_id : null,
+    item_offerId: firstItem ? firstItem.offerId : null,
     item_name: firstItem ? firstItem.item_name : null,
     price: firstItem ? firstItem.price : null
   });
@@ -50,15 +51,16 @@ export const createOrder = async (
       amount: totalAmount,
       currency: 'V-Bucks',
       items: items.map(item => ({
-        id: item.item_id,
-        name: item.item_name,
-        image: item.item_image,
+        offerId: item.offerId,
+        item_name: item.item_name,
+        item_image: item.item_image,
         price: item.price,
-        quantity: item.quantity
+        quantity: item.quantity,
+        epic_username: item.epic_username
       })),
       epic_username: epicUsername,
       processed_by: 'system',
-      item_eid: firstItem ? firstItem.item_id : null,
+      item_offerId: firstItem ? firstItem.offerId : null,
       item_name: firstItem ? firstItem.item_name : null,
       price: firstItem ? firstItem.price : null
     })
@@ -88,16 +90,16 @@ export const processOrder = async (orderId: string): Promise<Order> => {
     // Process each item in the order
     const items = order.items as OrderItem[];
     for (const item of items) {
-      // Validation: Ensure item_id is present
-      if (!item.item_id) {
-        throw new Error('Item is missing item_id, cannot create purchase record.');
+      // Validation: Ensure offerId is present
+      if (!item.offerId) {
+        throw new Error('Item is missing offerId, cannot create purchase record.');
       }
       // Create purchase record
       const { error: purchaseError } = await supabase
         .from('purchases')
         .insert({
           user_id: order.user_id,
-          item_eid: item.item_id,
+          item_eid: item.offerId,
           item_name: item.item_name,
           price: item.price,
           image_url: item.item_image,

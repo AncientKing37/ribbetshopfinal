@@ -1,4 +1,3 @@
-
 // Mock data to use as a fallback when API is not available
 export const mockShopData = {
   featured: [

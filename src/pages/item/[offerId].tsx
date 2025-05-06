@@ -27,7 +27,8 @@ interface ItemDetails {
 }
 
 const ItemPage = () => {
-  const { eid } = useParams();
+  const { offerId } = useParams();
+  const decodedOfferId = offerId ? decodeURIComponent(offerId) : '';
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user } = useAuth();
@@ -84,7 +85,11 @@ const ItemPage = () => {
         }
         
         const data = await response.json();
-        const shopItem = data.shop.find((item: any) => item.mainId === eid);
+        console.log('URL offerId:', offerId);
+        console.log('Shop offerIds:', data.shop.map((item: any) => item.offerId));
+        const shopItem = data.shop.find((item: any) =>
+          item.offerId === decodedOfferId || item.id === decodedOfferId || item.mainId === decodedOfferId
+        );
         
         if (shopItem) {
           setItem({
@@ -122,10 +127,10 @@ const ItemPage = () => {
       }
     };
 
-    if (eid) {
+    if (offerId) {
       fetchItemDetails();
     }
-  }, [eid, navigate, toast]);
+  }, [offerId, navigate, toast]);
 
   const handlePurchase = async () => {
     if (!user || !item) return;
@@ -146,7 +151,7 @@ const ItemPage = () => {
       const order = await createOrder(
         user.id,
         [{
-          item_id: eid,
+          offerId: offerId,
           item_name: item.name,
           item_image: item.images.featured,
           price: item.price,

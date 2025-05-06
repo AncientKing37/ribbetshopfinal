@@ -17,7 +17,7 @@ import Credits from "./pages/Credits";
 import ItemShop from "./pages/ItemShop";
 import FNCrew from "./pages/FNCrew";
 import NotFound from "./pages/NotFound";
-import ItemPage from "./pages/item/[eid]";
+import ItemPage from "./pages/item/[offerId]";
 import Cart from "./pages/Cart";
 import Contact from "./pages/Contact";
 import Orders from "./pages/Orders";
@@ -45,7 +45,7 @@ const App = () => (
             <Route path="/item-shop" element={<ItemShop />} />
             <Route path="/fn-crew" element={<FNCrew />} />
             <Route path="/contact" element={<Contact />} />
-            <Route path="/item/:eid" element={<ItemPage />} />
+            <Route path="/item/:offerId" element={<ItemPage />} />
             <Route path="/cart" element={<Cart />} />
             <Route path="/orders" element={<Orders />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

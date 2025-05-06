@@ -212,9 +212,10 @@ const ItemShopGrid = ({ data, isLoading, error, activeFilter }: ItemShopGridProp
             animate="show"
           >
             {items.map((entry, index) => (
+              console.log('Rendering shop entry:', entry['mainId'] || entry['offerId']),
               <ItemShopCard 
-                key={entry.offerId || `${section}-${index}`}
-                entry={entry}
+                key={entry['mainId'] || entry['offerId'] || `${section}-${index}`}
+                entry={{ ...entry, mainId: entry['mainId'] || entry['offerId'] }}
                 isFeatured={section === 'featured' || section === 'special'}
               />
             ))}

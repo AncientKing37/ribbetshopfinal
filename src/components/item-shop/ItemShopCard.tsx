@@ -113,7 +113,8 @@ const ItemShopCard = ({ entry, isFeatured = false }: ItemShopCardProps) => {
   const isGiftable = !entry.bundle && itemType.includes('outfit');
 
   const handleViewDetails = () => {
-    navigate(`/item/${entry.offerId}`);
+    console.log('Navigating to item detail:', entry);
+    navigate(`/item/${encodeURIComponent(entry.mainId)}`);
   };
 
   return (

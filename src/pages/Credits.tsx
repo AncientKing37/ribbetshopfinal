@@ -119,7 +119,7 @@ const Credits = () => {
       return;
     }
     await addToCart({
-      item_id: String(pkg.credits),
+      offerId: String(pkg.credits),
       item_name: pkg.name,
       item_image: `/uploads/credits/${pkg.credits}.png`,
       price: pkg.price,
@@ -137,7 +137,7 @@ const Credits = () => {
       return;
     }
     await addToCart({
-      item_id: String(pkg.credits),
+      offerId: String(pkg.credits),
       item_name: pkg.name,
       item_image: `/uploads/credits/${pkg.credits}.png`,
       price: pkg.price,

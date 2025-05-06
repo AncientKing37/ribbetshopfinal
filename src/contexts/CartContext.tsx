@@ -5,7 +5,7 @@ import { useToast } from '@/hooks/use-toast';
 interface CartItem {
   id: string;
   user_id: string;
-  item_id: string;
+  offerId: string;
   item_name: string;
   item_image: string;
   price: number;
@@ -18,7 +18,7 @@ interface CartContextType {
   itemCount: number;
   totalPrice: number;
   addToCart: (item: Omit<CartItem, 'id' | 'user_id' | 'added_at'>) => Promise<void>;
-  removeFromCart: (itemId: string) => Promise<void>;
+  removeFromCart: (offerId: string) => Promise<void>;
   clearCart: () => Promise<void>;
   refreshCart: () => Promise<void>;
 }
@@ -44,16 +44,9 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
       return;
     }
 
-    setItems((data || []).map((item) => ({
-      id: item.id,
-      user_id: item.user_id,
-      item_id: item.item_id,
-      item_name: item.item_name,
-      item_image: item.item_image,
-      price: item.price,
-      quantity: item.quantity,
-      added_at: item.added_at,
-    })));
+    setItems(
+      data.map((item) => ({ ...item, offerId: item.item_id }))
+    );
   };
 
   useEffect(() => {
@@ -76,13 +69,13 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
       .from('cart')
       .select('*')
       .eq('user_id', session.user.id)
-      .eq('item_id', item.item_id);
+      .eq('item_id', item.offerId);
     const existing = existingArr && existingArr.length > 0 ? existingArr[0] : null;
 
     if (existing) {
       // Optimistic update: increment quantity in local state
       setItems((prev) => prev.map((ci) =>
-        ci.user_id === session.user.id && ci.item_id === item.item_id
+        ci.user_id === session.user.id && ci.offerId === item.offerId
           ? { ...ci, quantity: ci.quantity + 1 }
           : ci
       ));
@@ -114,6 +107,7 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
           user_id: session.user.id,
           added_at: new Date().toISOString(),
           quantity: 1,
+          offerId: item.offerId,
         },
       ]);
       toast({
@@ -124,10 +118,13 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
       const { error: insertError } = await supabase
         .from('cart')
         .insert({
-          ...item,
+          item_id: item.offerId,
+          item_name: item.item_name,
+          item_image: item.item_image,
+          price: item.price,
+          quantity: 1,
           user_id: session.user.id,
           added_at: new Date().toISOString(),
-          quantity: 1,
         });
       if (insertError) {
         console.error('Error adding to cart:', insertError);
@@ -142,14 +139,14 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
     await refreshCart();
   };
 
-  const removeFromCart = async (itemId: string) => {
+  const removeFromCart = async (offerId: string) => {
     // Optimistic update
-    setItems((prev) => prev.filter((item) => item.id !== itemId));
+    setItems((prev) => prev.filter((item) => item.offerId !== offerId));
 
     const { error } = await supabase
       .from('cart')
       .delete()
-      .eq('id', itemId);
+      .eq('item_id', offerId);
 
     await refreshCart();
 

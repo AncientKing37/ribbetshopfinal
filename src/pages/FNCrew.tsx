@@ -54,7 +54,7 @@ const FNCrew: React.FC = () => {
 
   const handleAddToCart = async (pkg) => {
     await addToCart({
-      item_id: pkg.name,
+      offerId: pkg.name,
       item_name: pkg.name,
       item_image: pkg.image,
       price: pkg.price,
@@ -64,7 +64,7 @@ const FNCrew: React.FC = () => {
 
   const handleBuyNow = async (pkg) => {
     await addToCart({
-      item_id: pkg.name,
+      offerId: pkg.name,
       item_name: pkg.name,
       item_image: pkg.image,
       price: pkg.price,

@@ -74,7 +74,7 @@ const fetchFortniteShop = async () => {
           entries: data.shop
             .filter((item: any) => !item.featured)
             .map((item: any) => ({
-              offerId: item.mainId,
+              offerId: item.offerId || item.id || item.mainId,
               items: [{
                 name: item.displayName || item.name,
                 description: item.displayDescription || item.description,
