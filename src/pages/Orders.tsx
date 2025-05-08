@@ -158,29 +158,27 @@ const Orders = () => {
                 </div>
 
                 <div className="space-y-4">
-                  {(order.items as any[]).map((item, index) => (
-                    <div key={index} className="flex items-center gap-4 p-4 bg-gray-800 rounded">
-                      {item.item_image && (
-                        <img
-                          src={item.item_image}
-                          alt={item.item_name}
-                          className="w-16 h-16 object-cover rounded"
-                        />
-                      )}
-                      <div className="flex-1">
-                        <h4 className="text-white font-medium">{item.item_name}</h4>
-                        <p className="text-gray-400 text-sm">
-                          Quantity: {item.quantity} • ${item.price.toFixed(2)} each
-                        </p>
-                        <p className="text-gray-400 text-sm">
-                          Epic Username: {item.epic_username}
-                        </p>
-                      </div>
-                      <div className="text-cyber-purple font-bold">
-                        ${(item.price * item.quantity).toFixed(2)}
-                      </div>
+                  <div className="flex items-center gap-4 p-4 bg-gray-800 rounded">
+                    {order.item_image && (
+                      <img
+                        src={order.item_image}
+                        alt={order.item_name}
+                        className="w-16 h-16 object-cover rounded"
+                      />
+                    )}
+                    <div className="flex-1">
+                      <h4 className="text-white font-medium">{order.item_name}</h4>
+                      <p className="text-gray-400 text-sm">
+                        Quantity: {order.quantity} • ${order.price.toFixed(2)} each
+                      </p>
+                      <p className="text-gray-400 text-sm">
+                        Epic Username: {order.epic_username}
+                      </p>
                     </div>
-                  ))}
+                    <div className="text-cyber-purple font-bold">
+                      ${(order.price * order.quantity).toFixed(2)}
+                    </div>
+                  </div>
                 </div>
 
                 <div className="mt-4 pt-4 border-t border-gray-800 flex justify-between items-center">

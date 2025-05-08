@@ -150,14 +150,14 @@ const ItemPage = () => {
       // Create order
       const order = await createOrder(
         user.id,
-        [{
+        {
           offerId: offerId,
           item_name: item.name,
           item_image: item.images.featured,
           price: item.price,
           quantity: 1,
           epic_username: epicUsername
-        }],
+        },
         epicUsername,
         item.price
       );

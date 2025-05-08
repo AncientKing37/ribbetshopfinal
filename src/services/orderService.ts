@@ -1,6 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
 import { Database } from '@/integrations/supabase/types';
-import ItemPage from "./pages/item/[offerId]";
+import ItemPage from "@/pages/item/[offerId]";
 
 type OrderStatus = Database['public']['Enums']['order_status'];
 type Order = any;
@@ -16,53 +16,23 @@ export interface OrderItem {
 
 export const createOrder = async (
   userId: string,
-  items: OrderItem[],
+  item: OrderItem,
   epicUsername: string,
   totalAmount: number
 ): Promise<Order> => {
-  // Get the first item for the main order fields, fallback to nulls if not present
-  const firstItem = items && items.length > 0 ? items[0] : null;
-
-  // Debug log
-  console.log('Creating order with:', {
-    user_id: userId,
-    status: 'pending',
-    amount: totalAmount,
-    currency: 'V-Bucks',
-    items: items.map(item => ({
-      offerId: item.offerId,
-      name: item.item_name,
-      image: item.item_image,
-      price: item.price,
-      quantity: item.quantity
-    })),
-    epic_username: epicUsername,
-    processed_by: 'system',
-    item_offerId: firstItem ? firstItem.offerId : null,
-    item_name: firstItem ? firstItem.item_name : null,
-    price: firstItem ? firstItem.price : null
-  });
-
   const { data, error } = await supabase
-    .from('itemshop_orders')
+    .from('orders')
     .insert({
       user_id: userId,
+      offer_id: item.offerId,
+      item_name: item.item_name,
+      item_image: item.item_image,
+      price: item.price,
+      quantity: item.quantity,
+      epic_username: epicUsername,
       status: 'pending',
       amount: totalAmount,
-      currency: 'V-Bucks',
-      items: items.map(item => ({
-        offerId: item.offerId,
-        item_name: item.item_name,
-        item_image: item.item_image,
-        price: item.price,
-        quantity: item.quantity,
-        epic_username: item.epic_username
-      })),
-      epic_username: epicUsername,
       processed_by: 'system',
-      item_offerId: firstItem ? firstItem.offerId : null,
-      item_name: firstItem ? firstItem.item_name : null,
-      price: firstItem ? firstItem.price : null
     })
     .select()
     .single();
@@ -77,7 +47,7 @@ export const createOrder = async (
 export const processOrder = async (orderId: string): Promise<Order> => {
   // Do NOT update order status to processing here. Let the Discord bot handle status changes.
   const { data: order, error } = await supabase
-    .from('itemshop_orders')
+    .from('orders')
     .select()
     .eq('id', orderId)
     .single();
@@ -87,41 +57,33 @@ export const processOrder = async (orderId: string): Promise<Order> => {
   }
 
   try {
-    // Process each item in the order
-    const items = order.items as OrderItem[];
-    for (const item of items) {
-      // Validation: Ensure offerId is present
-      if (!item.offerId) {
-        throw new Error('Item is missing offerId, cannot create purchase record.');
-      }
-      // Create purchase record
-      const { error: purchaseError } = await supabase
-        .from('purchases')
-        .insert({
-          user_id: order.user_id,
-          item_eid: item.offerId,
-          item_name: item.item_name,
-          price: item.price,
-          image_url: item.item_image,
-          epic_username: item.epic_username,
-          order_id: order.id,
-          status: 'completed'
-        });
+    // Create purchase record for the single item
+    const { error: purchaseError } = await supabase
+      .from('purchases')
+      .insert({
+        user_id: order.user_id,
+        item_eid: order.offer_id,
+        item_name: order.item_name,
+        price: order.price,
+        image_url: order.item_image,
+        epic_username: order.epic_username,
+        order_id: order.id,
+        status: 'completed',
+      });
 
-      if (purchaseError) {
-        throw new Error(`Failed to create purchase record: ${purchaseError.message}`);
-      }
+    if (purchaseError) {
+      throw new Error(`Failed to create purchase record: ${purchaseError.message}`);
     }
 
     // Do NOT set status to processing or completed here. Let the Discord bot do it after gifting.
     return order;
   } catch (error) {
     // If any error occurs, mark the order as failed
-    const { data: failedOrder } = await supabase
-      .from('itemshop_orders')
+    await supabase
+      .from('orders')
       .update({
         status: 'failed',
-        error_message: error instanceof Error ? error.message : 'Unknown error occurred'
+        error_message: error instanceof Error ? error.message : 'Unknown error occurred',
       })
       .eq('id', orderId)
       .select()
@@ -133,7 +95,7 @@ export const processOrder = async (orderId: string): Promise<Order> => {
 
 export const getOrder = async (orderId: string): Promise<Order> => {
   const { data, error } = await supabase
-    .from('itemshop_orders')
+    .from('orders')
     .select()
     .eq('id', orderId)
     .single();
@@ -147,7 +109,7 @@ export const getOrder = async (orderId: string): Promise<Order> => {
 
 export const getUserOrders = async (userId: string): Promise<Order[]> => {
   const { data, error } = await supabase
-    .from('itemshop_orders')
+    .from('orders')
     .select()
     .eq('user_id', userId)
     .order('created_at', { ascending: false });

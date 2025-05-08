@@ -66,36 +66,37 @@ const Cart = () => {
     
     setCheckoutLoading(true);
     try {
-      // Create order
-      const order = await createOrder(
-        userId,
-        items.map(item => ({
-          offerId: item.offerId,
-          item_name: item.item_name,
-          item_image: item.item_image,
-          price: item.price,
-          quantity: item.quantity,
-          epic_username: epicUsername
-        })),
-        epicUsername,
-        totalPrice
-      );
+      // For each item in the cart, create a separate order
+      for (const item of items) {
+        const order = await createOrder(
+          userId,
+          {
+            offerId: item.offerId,
+            item_name: item.item_name,
+            item_image: item.item_image,
+            price: item.price,
+            quantity: item.quantity,
+            epic_username: epicUsername
+          },
+          epicUsername,
+          item.price * (item.quantity || 1)
+        );
 
-      // Process order
-      await processOrder(order.id);
+        // Process order
+        await processOrder(order.id);
+
+        // Update user credits after each order
+        const { error: creditError } = await supabase
+          .from('profiles')
+          .update({ credits: credits - (item.price * (item.quantity || 1)) })
+          .eq('id', userId);
+        if (creditError) {
+          throw new Error('Failed to update credits');
+        }
+      }
 
       // Clear cart
       await clearCart();
-
-      // Update user credits
-      const { error: creditError } = await supabase
-        .from('profiles')
-        .update({ credits: credits - totalPrice })
-        .eq('id', userId);
-
-      if (creditError) {
-        throw new Error('Failed to update credits');
-      }
 
       toast({ 
         title: 'Order Successful', 
