@@ -45,9 +45,9 @@ export const createOrder = async (
 };
 
 export const processOrder = async (orderId: string): Promise<Order> => {
-  // Do NOT update order status to processing here. Let the Discord bot handle status changes.
+  // Fetch the order
   const { data: order, error } = await supabase
-    .from('orders')
+    .from('itemshop_orders')
     .select()
     .eq('id', orderId)
     .single();
@@ -57,37 +57,26 @@ export const processOrder = async (orderId: string): Promise<Order> => {
   }
 
   try {
-    // Create purchase record for the single item
-    const { error: purchaseError } = await supabase
-      .from('purchases')
-      .insert({
-        user_id: order.user_id,
-        item_eid: order.offer_id,
-        item_name: order.item_name,
-        price: order.price,
-        image_url: order.item_image,
-        epic_username: order.epic_username,
-        order_id: order.id,
-        status: 'completed',
-      });
+    // Mark the order as completed
+    const { error: updateError } = await supabase
+      .from('itemshop_orders')
+      .update({ status: 'completed' })
+      .eq('id', orderId);
 
-    if (purchaseError) {
-      throw new Error(`Failed to create purchase record: ${purchaseError.message}`);
+    if (updateError) {
+      throw new Error(`Failed to update order status: ${updateError.message}`);
     }
 
-    // Do NOT set status to processing or completed here. Let the Discord bot do it after gifting.
-    return order;
+    return { ...order, status: 'completed' };
   } catch (error) {
-    // If any error occurs, mark the order as failed
+    // Mark the order as failed if any error occurs
     await supabase
-      .from('orders')
+      .from('itemshop_orders')
       .update({
         status: 'failed',
         error_message: error instanceof Error ? error.message : 'Unknown error occurred',
       })
-      .eq('id', orderId)
-      .select()
-      .single();
+      .eq('id', orderId);
 
     throw error;
   }
