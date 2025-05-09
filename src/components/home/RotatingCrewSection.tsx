@@ -69,7 +69,7 @@ const RotatingCrewSection = () => {
   };
 
   return (
-    <section className="py-16 relative overflow-hidden" style={{ background: 'url(/uploads/green-bg.png) center center / cover no-repeat' }}>
+    <section className="py-16 relative overflow-hidden" style={{ background: 'url(/uploads/crew-bg.webp) center center / cover no-repeat' }}>
       {/* Background grid pattern */}
       <div className="absolute inset-0 opacity-10 bg-grid-pattern"></div>
       

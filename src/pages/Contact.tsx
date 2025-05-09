@@ -1,123 +1,49 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import Navbar from "@/components/layout/Navbar";
+import Footer from "@/components/layout/Footer";
 
 const Contact = () => {
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    subject: '',
-    message: ''
-  });
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Handle form submission here
-    console.log('Form submitted:', formData);
-  };
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
-
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-8 text-center">Contact Us</h1>
+    <div className="min-h-screen flex flex-col">
+      <Navbar />
       
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <Card>
-          <CardHeader>
-            <CardTitle>Get in Touch</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label htmlFor="name" className="block text-sm font-medium mb-1">Name</label>
-                <Input
-                  id="name"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-              
-              <div>
-                <label htmlFor="email" className="block text-sm font-medium mb-1">Email</label>
-                <Input
-                  id="email"
-                  name="email"
-                  type="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-              
-              <div>
-                <label htmlFor="subject" className="block text-sm font-medium mb-1">Subject</label>
-                <Input
-                  id="subject"
-                  name="subject"
-                  value={formData.subject}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-              
-              <div>
-                <label htmlFor="message" className="block text-sm font-medium mb-1">Message</label>
-                <Textarea
-                  id="message"
-                  name="message"
-                  value={formData.message}
-                  onChange={handleChange}
-                  required
-                  className="min-h-[150px]"
-                />
-              </div>
-              
-              <Button type="submit" className="w-full">Send Message</Button>
-            </form>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Contact Information</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <h3 className="font-semibold mb-2">Email</h3>
-              <p>support@ribbetshop.com</p>
-            </div>
-            
-            <div>
-              <h3 className="font-semibold mb-2">Phone</h3>
-              <p>+1 (555) 123-4567</p>
-            </div>
-            
-            <div>
-              <h3 className="font-semibold mb-2">Address</h3>
-              <p>123 Frog Street</p>
-              <p>Pond City, PC 12345</p>
-            </div>
-            
-            <div>
-              <h3 className="font-semibold mb-2">Business Hours</h3>
-              <p>Monday - Friday: 9:00 AM - 6:00 PM</p>
-              <p>Saturday: 10:00 AM - 4:00 PM</p>
-              <p>Sunday: Closed</p>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+      <main 
+        className="flex-grow flex items-center justify-center relative"
+        style={{
+          backgroundImage: 'url("/common-bg.webp")',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat'
+        }}
+      >
+        <div className="absolute inset-0 bg-black/50" /> {/* Overlay for better text readability */}
+        
+        <div className="relative z-10 text-center px-4 py-16 max-w-2xl mx-auto">
+          <h1 className="text-4xl md:text-5xl font-bold text-white mb-6">
+            Need Help? Contact Us on Discord
+          </h1>
+          
+          <p className="text-lg md:text-xl text-white/90 mb-8">
+            Join our official Discord server to get support, ask questions, or just chat with the team.
+          </p>
+          
+          <Button
+            asChild
+            className="bg-[#5865F2] hover:bg-[#4752C4] text-white px-8 py-6 text-lg rounded-lg transition-colors"
+          >
+            <a 
+              href="https://discord.gg/yourserver" 
+              target="_blank" 
+              rel="noopener noreferrer"
+            >
+              Join Discord Server
+            </a>
+          </Button>
+        </div>
+      </main>
+      
+      <Footer />
     </div>
   );
 };

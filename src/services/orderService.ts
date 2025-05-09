@@ -50,10 +50,16 @@ export const processOrder = async (orderId: string): Promise<Order> => {
     .from('itemshop_orders')
     .select()
     .eq('id', orderId)
-    .single();
+    .maybeSingle();
 
   if (error) {
+    if (error.code === 'PGRST116') {
+      throw new Error('Multiple orders found with the same ID. Please check your database.');
+    }
     throw new Error(`Failed to fetch order: ${error.message}`);
+  }
+  if (!order) {
+    throw new Error('Order not found.');
   }
 
   try {
@@ -87,10 +93,16 @@ export const getOrder = async (orderId: string): Promise<Order> => {
     .from('orders')
     .select()
     .eq('id', orderId)
-    .single();
+    .maybeSingle();
 
   if (error) {
+    if (error.code === 'PGRST116') {
+      throw new Error('Multiple orders found with the same ID. Please check your database.');
+    }
     throw new Error(`Failed to get order: ${error.message}`);
+  }
+  if (!data) {
+    throw new Error('Order not found.');
   }
 
   return data;

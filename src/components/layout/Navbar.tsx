@@ -6,6 +6,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useCart } from '@/contexts/CartContext';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { OptimizedImage } from '@/components/ui/optimized-image';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -81,8 +82,8 @@ const Navbar = () => {
         <div className="flex justify-between items-center">
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-1">
-            <img
-              src="/uploads/logo.png"
+            <OptimizedImage
+              src="/uploads/logo.webp"
               alt="Logo"
               className="h-12 w-auto"
               style={{ minWidth: '3rem' }}
@@ -105,6 +106,9 @@ const Navbar = () => {
             </Link>
             <Link to="/fn-crew" className="text-white hover:text-cyber-purple transition-colors">
               FN Crew
+            </Link>
+            <Link to="/gifting-bots" className="text-white hover:text-cyber-purple transition-colors">
+              Gifting Bots
             </Link>
             <Link to="/contact" className="text-white hover:text-cyber-purple transition-colors">
               Contact Us
@@ -219,6 +223,13 @@ const Navbar = () => {
               onClick={() => setIsMenuOpen(false)}
             >
               FN Crew
+            </Link>
+            <Link 
+              to="/gifting-bots" 
+              className="block py-2 px-4 text-white hover:bg-cyber-blue rounded-md"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Gifting Bots
             </Link>
             <Link 
               to="/contact" 

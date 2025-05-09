@@ -13,37 +13,37 @@ export const crewPackages = [
     name: 'FN Crew 2 Months',
     months: 2,
     price: 9.00,
-    image: '/uploads/crew/2m.png',
+    image: '/uploads/crew/2m.webp',
   },
   {
     name: 'FN Crew 3 Months',
     months: 3,
     price: 13.00,
-    image: '/uploads/crew/3m.png',
+    image: '/uploads/crew/3m.webp',
   },
   {
     name: 'FN Crew 4 Months',
     months: 4,
     price: 17.00,
-    image: '/uploads/crew/4m.png',
+    image: '/uploads/crew/4m.webp',
   },
   {
     name: 'FN Crew 5 Months',
     months: 5,
     price: 21.00,
-    image: '/uploads/crew/5m.png',
+    image: '/uploads/crew/5m.webp',
   },
   {
     name: 'FN Crew 6 Months',
     months: 6,
     price: 24.00,
-    image: '/uploads/crew/6m.png',
+    image: '/uploads/crew/6m.webp',
   },
   {
     name: 'FN Crew 12 Months',
     months: 12,
     price: 48.00,
-    image: '/uploads/crew/12m.png',
+    image: '/uploads/crew/12m.webp',
   },
 ];
 
@@ -76,7 +76,7 @@ const FNCrew: React.FC = () => {
 
   return (
     <Layout title="FN Crew">
-      <div className="py-8 md:py-16" style={{ background: 'url(/uploads/green-bg.png) center center / cover no-repeat', minHeight: '100vh' }}>
+      <div className="py-8 md:py-16" style={{ background: 'url(/uploads/crew-bg.webp) center center / cover no-repeat', minHeight: '100vh' }}>
         <div className="container mx-auto px-4">
           <motion.div 
             className="text-center mb-8 md:mb-12"
@@ -85,9 +85,9 @@ const FNCrew: React.FC = () => {
             transition={{ duration: 0.5 }}
           >
             <h1 className="text-3xl md:text-4xl font-bold mb-4">
-              <span className="text-black">Fortnite Crew</span>
+              <span className="text-white">Fortnite Crew</span>
             </h1>
-            <p className="max-w-2xl mx-auto text-black">
+            <p className="max-w-2xl mx-auto text-white">
               Fortnite Crew subscription at the best price!
             </p>
           </motion.div>

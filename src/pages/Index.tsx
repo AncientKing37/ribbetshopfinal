@@ -4,7 +4,6 @@ import ServicesSection from '@/components/home/ServicesSection';
 import RotatingCreditsSection from '@/components/home/RotatingCreditsSection';
 import RotatingCrewSection from '@/components/home/RotatingCrewSection';
 // import TestimonialsSection from '@/components/home/TestimonialsSection';
-import CallToAction from '@/components/home/CallToAction';
 
 const Index = () => {
   return (
@@ -14,7 +13,6 @@ const Index = () => {
       <RotatingCreditsSection />
       <RotatingCrewSection />
       {/* <TestimonialsSection /> */}
-      <CallToAction />
     </Layout>
   );
 };

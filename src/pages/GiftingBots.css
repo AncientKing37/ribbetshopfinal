@@ -1,0 +1,46 @@
+.rotating-border {
+  position: relative;
+  z-index: 0;
+  border-radius: 1.25rem;
+}
+.rotating-border::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: 1.25rem;
+  padding: 0;
+  background: conic-gradient(
+    from 0deg,
+    #a78bfa 0%,
+    #7c3aed 25%,
+    #a78bfa 50%,
+    #7c3aed 75%,
+    #a78bfa 100%
+  );
+  background-size: 200% 200%;
+  animation: border-move 2.5s linear infinite;
+  mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  -webkit-mask-composite: xor;
+  padding: 0;
+  /* Create a transparent center so only the border shows */
+  box-shadow: 0 0 32px 0 #7c3aed33;
+  pointer-events: none;
+}
+@keyframes border-move {
+  100% {
+    background-position: 200% 0;
+  }
+}
+.rotating-border > div {
+  position: relative;
+  z-index: 2;
+  border-radius: 1rem;
+  background: #181823;
+} 

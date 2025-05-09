@@ -30,7 +30,7 @@ const RotatingCreditsSection = () => {
       user_id: user.id,
       item_id: String(pkg.credits),
       item_name: pkg.name,
-      item_image: `/uploads/credits/${pkg.credits}.png`,
+      item_image: `/uploads/credits/${pkg.credits}.webp`,
       price: pkg.price,
       quantity: 1,
     });
@@ -63,7 +63,7 @@ const RotatingCreditsSection = () => {
   };
 
   return (
-    <section className="py-16 relative" style={{ background: 'url(/uploads/common-bg.png) center center / cover no-repeat' }}>
+    <section className="py-16 relative" style={{ background: 'url(/uploads/common-bg.webp) center center / cover no-repeat' }}>
       {/* Custom bounce keyframes for left/right */}
       <style>{`
         @keyframes bounce-x-left {
@@ -84,7 +84,7 @@ const RotatingCreditsSection = () => {
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold mb-2 text-white">Gift Credits</h2>
-          <p className="text-white text-lg max-w-2xl mx-auto">Charge Gift Credits to your account and use on gifting!</p>
+          <p className="text-white text-lg max-w-2xl mx-auto">Top up and gift items to yourself.</p>
         </div>
         <div className="relative">
           {/* Swiper Carousel - custom navigation */}
@@ -116,7 +116,7 @@ const RotatingCreditsSection = () => {
                   {/* Image section */}
                   <div className="relative">
                     <img
-                      src={`/uploads/credits/${pkg.credits}.png`}
+                      src={`/uploads/credits/${pkg.credits}.webp`}
                       alt={`${pkg.credits} Credits`}
                       className="w-full h-[400px] object-cover rounded-t-2xl bg-black"
                     />

@@ -121,7 +121,7 @@ const Credits = () => {
     await addToCart({
       offerId: String(pkg.credits),
       item_name: pkg.name,
-      item_image: `/uploads/credits/${pkg.credits}.png`,
+      item_image: `/uploads/credits/${pkg.credits}.webp`,
       price: pkg.price,
       quantity: 1,
     });
@@ -139,7 +139,7 @@ const Credits = () => {
     await addToCart({
       offerId: String(pkg.credits),
       item_name: pkg.name,
-      item_image: `/uploads/credits/${pkg.credits}.png`,
+      item_image: `/uploads/credits/${pkg.credits}.webp`,
       price: pkg.price,
       quantity: 1,
     });
@@ -189,7 +189,7 @@ const Credits = () => {
 
   return (
     <Layout title="Purchase Credits">
-      <div className="py-8 md:py-16" style={{ background: 'url(/uploads/common-bg.png) center center / cover no-repeat', minHeight: '100vh' }}>
+      <div className="py-8 md:py-16" style={{ background: 'url(/uploads/common-bg.webp) center center / cover no-repeat', minHeight: '100vh' }}>
         <div className="container mx-auto px-4">
           <motion.div 
             className="text-center mb-8 md:mb-12"
@@ -223,16 +223,16 @@ const Credits = () => {
                   {/* Image section */}
                   <div className="relative">
                     <img
-                      src={`/uploads/credits/${pkg.credits}.png`}
+                      src={`/uploads/credits/${pkg.credits}.webp`}
                       alt={`${pkg.credits} Credits`}
-                      className="w-full h-[400px] object-contain rounded-t-2xl bg-black"
+                      className="w-full h-[400px] object-cover rounded-t-2xl bg-black"
                     />
                   </div>
                   {/* Bottom section */}
                   <div className="flex flex-col bg-[#181B23] p-6 rounded-b-2xl">
                     <div>
-                      <div className="text-lg font-bold text-white mb-0.5">{pkg.credits.toLocaleString()} Web Credit</div>
-                      <div className="text-gray-400 text-sm mb-2">Get Web Credits on our website!</div>
+                      <div className="text-lg font-bold text-white mb-0.5">{pkg.credits.toLocaleString()} Gift Credits</div>
+                      <div className="text-gray-400 text-sm mb-2">Add credits, choose your item, and gift it straight to your own account.</div>
                     </div>
                     <div className="flex items-center justify-between">
                       <div className="text-white text-lg font-bold">${pkg.price.toFixed(2)} USD</div>
@@ -259,78 +259,6 @@ const Credits = () => {
                 </motion.div>
               ))}
             </div>
-          </div>
-          
-          <div className="mt-16 max-w-3xl mx-auto">
-            <div className="cyber-card p-6">
-              <h3 className="text-xl font-bold mb-4 text-center text-cyber-purple-light">Why Purchase Credits?</h3>
-              <ul className="space-y-3 text-gray-300">
-                <li className="flex items-start">
-                  <svg className="w-5 h-5 text-cyber-purple mr-2 mt-1 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                  </svg>
-                  <span>Credits never expire - purchase once and use anytime.</span>
-                </li>
-                <li className="flex items-start">
-                  <svg className="w-5 h-5 text-cyber-purple mr-2 mt-1 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                  </svg>
-                  <span>Larger credit packages include bonus credits at no extra cost.</span>
-                </li>
-                <li className="flex items-start">
-                  <svg className="w-5 h-5 text-cyber-purple mr-2 mt-1 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                  </svg>
-                  <span>Purchase multiple items without needing to checkout each time.</span>
-                </li>
-                <li className="flex items-start">
-                  <svg className="w-5 h-5 text-cyber-purple mr-2 mt-1 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                  </svg>
-                  <span>Secure payments via credit card, PayPal, or cryptocurrency.</span>
-                </li>
-              </ul>
-            </div>
-          </div>
-
-          {/* Cart Section */}
-          <div className="mt-12 max-w-2xl mx-auto w-full bg-[#181B23] rounded-xl p-6 shadow-lg">
-            <h2 className="text-2xl font-bold text-cyber-purple mb-4">Your Cart</h2>
-            {cartLoading ? (
-              <div className="text-gray-400">Loading...</div>
-            ) : cartError ? (
-              <div className="text-red-500">{cartError}</div>
-            ) : cartItems.length === 0 ? (
-              <div className="text-gray-400">Your cart is empty.</div>
-            ) : (
-              <>
-                <ul className="divide-y divide-cyber-purple/20 mb-4">
-                  {cartItems.map((item) => (
-                    <li key={item.id} className="py-2 flex justify-between items-center gap-2">
-                      <span className="text-white">{item.item_name}</span>
-                      <span className="text-cyber-purple font-bold">${item.price.toFixed(2)}</span>
-                      <div className="flex items-center gap-1">
-                        <Button size="sm" variant="outline" className="px-2 py-1" onClick={() => handleUpdateQuantity(item.id, item.quantity - 1)} disabled={cartLoading || item.quantity <= 1}>-</Button>
-                        <span className="mx-2 text-white font-bold">{item.quantity}</span>
-                        <Button size="sm" variant="outline" className="px-2 py-1" onClick={() => handleUpdateQuantity(item.id, item.quantity + 1)} disabled={cartLoading}>+</Button>
-                      </div>
-                      <Button size="sm" variant="outline" className="ml-2 text-red-400 border-red-400 hover:bg-red-900/30" onClick={() => handleRemoveCartItem(item.id)} disabled={cartLoading}>
-                        Remove
-                      </Button>
-                    </li>
-                  ))}
-                </ul>
-                <div className="flex justify-between items-center text-lg font-bold text-white mb-4">
-                  <span>Total:</span>
-                  <span>
-                    ${cartItems.reduce((sum, item) => sum + (item.price * (item.quantity || 1)), 0).toFixed(2)}
-                  </span>
-                </div>
-                <Button className="w-full bg-cyber-magenta hover:bg-cyber-magenta/90 text-white font-bold py-3 rounded-lg" onClick={handleCheckout} disabled={checkoutLoading || cartItems.length === 0}>
-                  {checkoutLoading ? 'Processing...' : 'Checkout'}
-                </Button>
-              </>
-            )}
           </div>
         </div>
       </div>

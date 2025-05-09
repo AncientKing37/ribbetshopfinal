@@ -21,6 +21,7 @@ import ItemPage from "./pages/item/[offerId]";
 import Cart from "./pages/Cart";
 import Contact from "./pages/Contact";
 import Orders from "./pages/Orders";
+import GiftingBots from "./pages/GiftingBots";
 
 const queryClient = new QueryClient();
 
@@ -45,6 +46,7 @@ const App = () => (
             <Route path="/item-shop" element={<ItemShop />} />
             <Route path="/fn-crew" element={<FNCrew />} />
             <Route path="/contact" element={<Contact />} />
+            <Route path="/gifting-bots" element={<GiftingBots />} />
             <Route path="/item/:offerId" element={<ItemPage />} />
             <Route path="/cart" element={<Cart />} />
             <Route path="/orders" element={<Orders />} />

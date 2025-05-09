@@ -2,14 +2,15 @@ import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ChevronDown } from 'lucide-react';
+import { OptimizedImage } from '@/components/ui/optimized-image';
 
 const HeroSection = () => {
   return (
     <div className="relative overflow-hidden bg-cyber-blue-dark py-24 md:py-32 min-h-[90vh] flex items-center">
       {/* Background image */}
       <div className="absolute inset-0">
-        <img 
-          src="/uploads/home-bg.png" 
+        <OptimizedImage 
+          src="/uploads/home-bg.webp" 
           alt="Background" 
           className="w-full h-full object-cover object-center" 
         />
@@ -38,7 +39,7 @@ const HeroSection = () => {
               <span className="cyber-neon-text"></span>
             </h1>
             
-            <p className="text-gray-300 text-xl md:text-2xl mb-10 max-w-2xl">Buy at the best price with fast and secure delivery. Enjoy the game without overspending.</p>
+            <p className="text-gray-300 text-xl md:text-2xl mb-10 max-w-2xl">Unbeatable Prices and Fast, Secure Delivery..</p>
             
             <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-6">
               <Button className="cyber-button bg-cyber-purple hover:bg-cyber-purple/80 text-xl py-7 px-10" asChild>

@@ -4,6 +4,7 @@ import Layout from '@/components/layout/Layout';
 import AuthForm from '@/components/auth/AuthForm';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { OptimizedImage } from '@/components/ui/optimized-image';
 
 const Login = () => {
   const { user } = useAuth();
@@ -26,8 +27,8 @@ const Login = () => {
       <div className="relative min-h-screen overflow-hidden">
         {/* Background Image */}
         <div className="absolute inset-0 z-0">
-          <img 
-            src="/uploads/login-bg.png" 
+          <OptimizedImage 
+            src="/uploads/login-bg.webp" 
             alt="Background" 
             className="w-full h-full object-cover"
           />
