@@ -161,14 +161,8 @@ const ItemPage = () => {
       // Create order
       const order = await createItemshopOrder(
         user.id,
-        {
-          item_id: item.id,
-          offer_id: decodedOfferId,
-          item_name: item.name,
-          item_type: item.type,
-          final_price: item.price,
-          epic_username: epicUsername
-        },
+        decodedOfferId,
+        epicUsername,
         `${window.location.origin}/api/webhooks/itemshop`
       );
 
