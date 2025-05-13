@@ -15,6 +15,7 @@ import { createItemshopOrder, processItemshopOrder } from '@/services/itemshopOr
 const API_KEY = 'e0372996-579b848c-da237dbb-3c57cb66';
 
 interface ItemDetails {
+  id: number;
   name: string;
   description: string;
   type: string;
@@ -93,6 +94,7 @@ const ItemPage = () => {
         
         if (shopItem) {
           setItem({
+            id: shopItem.id || shopItem.mainId || 0,
             name: shopItem.displayName || shopItem.name,
             description: shopItem.displayDescription || shopItem.description || '',
             type: shopItem.type?.name || shopItem.type || 'Unknown',
@@ -112,6 +114,15 @@ const ItemPage = () => {
             title: "Item not found",
             description: "The requested item could not be found in the shop.",
             variant: "destructive",
+          });
+          setItem({
+            id: 0,
+            name: '',
+            description: '',
+            type: '',
+            rarity: '',
+            images: { icon: '', featured: '' },
+            price: 0
           });
           navigate('/shop');
         }
@@ -151,7 +162,7 @@ const ItemPage = () => {
       const order = await createItemshopOrder(
         user.id,
         {
-          item_id: parseInt(decodedOfferId),
+          item_id: item.id,
           offer_id: decodedOfferId,
           item_name: item.name,
           item_type: item.type,
