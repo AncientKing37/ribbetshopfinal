@@ -6,14 +6,14 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { Loader2, CheckCircle, XCircle, Clock, AlertCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { getUserOrders } from '@/services/orderService';
+import { getUserItemshopOrders, ItemshopOrder } from '@/services/itemshopOrderService';
 import { formatDistanceToNow } from 'date-fns';
 
 const Orders = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
-  const [orders, setOrders] = useState<any[]>([]);
+  const [orders, setOrders] = useState<ItemshopOrder[]>([]);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -27,7 +27,7 @@ const Orders = () => {
       }
 
       try {
-        const userOrders = await getUserOrders(session.user.id);
+        const userOrders = await getUserItemshopOrders(session.user.id);
         setOrders(userOrders);
       } catch (err) {
         console.error('Error fetching orders:', err);
@@ -45,7 +45,7 @@ const Orders = () => {
     fetchOrders();
   }, [navigate, toast]);
 
-  const getStatusIcon = (status: string) => {
+  const getStatusIcon = (status: string | null) => {
     switch (status) {
       case 'completed':
         return <CheckCircle className="h-5 w-5 text-green-500" />;
@@ -60,7 +60,7 @@ const Orders = () => {
     }
   };
 
-  const getStatusColor = (status: string) => {
+  const getStatusColor = (status: string | null) => {
     switch (status) {
       case 'completed':
         return 'text-green-500';
@@ -113,7 +113,7 @@ const Orders = () => {
             <h1 className="text-3xl font-bold text-white mb-4">No Orders Found</h1>
             <p className="text-gray-400 mb-8">You haven't placed any orders yet.</p>
             <Button
-              onClick={() => navigate('/credits')}
+              onClick={() => navigate('/item-shop')}
               className="bg-cyber-purple hover:bg-cyber-purple/90"
             >
               Browse Items
@@ -152,31 +152,27 @@ const Orders = () => {
                   <div className="flex items-center gap-2">
                     {getStatusIcon(order.status)}
                     <span className={`font-semibold ${getStatusColor(order.status)}`}>
-                      {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                      {order.status ? order.status.charAt(0).toUpperCase() + order.status.slice(1) : 'Unknown'}
                     </span>
                   </div>
                 </div>
 
                 <div className="space-y-4">
                   <div className="flex items-center gap-4 p-4 bg-gray-800 rounded">
-                    {order.item_image && (
-                      <img
-                        src={order.item_image}
-                        alt={order.item_name}
-                        className="w-16 h-16 object-cover rounded"
-                      />
-                    )}
                     <div className="flex-1">
                       <h4 className="text-white font-medium">{order.item_name}</h4>
                       <p className="text-gray-400 text-sm">
-                        Quantity: {order.quantity} • ${order.price.toFixed(2)} each
+                        Item Type: {order.item_type}
                       </p>
                       <p className="text-gray-400 text-sm">
                         Epic Username: {order.epic_username}
                       </p>
+                      <p className="text-gray-400 text-sm">
+                        Offer ID: {order.offer_id}
+                      </p>
                     </div>
                     <div className="text-cyber-purple font-bold">
-                      ${(order.price * order.quantity).toFixed(2)}
+                      ${order.final_price.toFixed(2)}
                     </div>
                   </div>
                 </div>
@@ -186,11 +182,14 @@ const Orders = () => {
                     {order.error_message && (
                       <p className="text-red-500 text-sm">{order.error_message}</p>
                     )}
+                    {order.webhook_status && (
+                      <p className="text-gray-400 text-sm">Webhook Status: {order.webhook_status}</p>
+                    )}
                   </div>
                   <div className="text-right">
                     <p className="text-gray-400 text-sm">Total Amount</p>
                     <p className="text-cyber-purple font-bold text-xl">
-                      ${order.amount.toFixed(2)}
+                      ${order.final_price.toFixed(2)}
                     </p>
                   </div>
                 </div>

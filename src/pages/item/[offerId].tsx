@@ -9,7 +9,7 @@ import { supabase } from '@/integrations/supabase/client';
 import Layout from '@/components/layout/Layout';
 import { Loader2 } from 'lucide-react';
 import { getEnv } from '@/integrations/supabase/env';
-import { createOrder, processOrder } from '@/services/orderService';
+import { createItemshopOrder, processItemshopOrder } from '@/services/itemshopOrderService';
 
 // FortniteAPI.io API key
 const API_KEY = 'e0372996-579b848c-da237dbb-3c57cb66';
@@ -148,22 +148,21 @@ const ItemPage = () => {
 
     try {
       // Create order
-      const order = await createOrder(
+      const order = await createItemshopOrder(
         user.id,
         {
-          offerId: offerId,
+          item_id: parseInt(decodedOfferId),
+          offer_id: decodedOfferId,
           item_name: item.name,
-          item_image: item.images.featured,
-          price: item.price,
-          quantity: 1,
+          item_type: item.type,
+          final_price: item.price,
           epic_username: epicUsername
         },
-        epicUsername,
-        item.price
+        `${window.location.origin}/api/webhooks/itemshop`
       );
 
       // Process order
-      await processOrder(order.id);
+      await processItemshopOrder(order.id);
 
       // Update user credits
       const { error: updateError } = await supabase
