@@ -35,8 +35,7 @@ export interface ItemshopOrder {
 export const createItemshopOrder = async (
   userId: string,
   offerId: string,
-  epicUsername: string,
-  webhookUrl: string
+  epicUsername: string
 ): Promise<ItemshopOrder> => {
   const { data, error } = await supabase
     .from('itemshop_orders')
@@ -44,9 +43,9 @@ export const createItemshopOrder = async (
       user_id: userId,
       offer_id: offerId,
       epic_username: epicUsername,
-      webhook_url: webhookUrl,
+      webhook_url: '',
       status: 'pending',
-      processed_by: 'system',
+      processed_by: '',
     })
     .select()
     .single();
